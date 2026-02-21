@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School Management System{% endblock %}</title>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Custom Navbar CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <!-- Left: Logo -->
+        <a href="{% url 'dashboard_redirect' %}" class="navbar-brand">SMS</a>
+
+        <!-- Center: Menu items -->
+        {% if user.is_authenticated %}
+            <ul class="nav-menu">
+                {% if user.role == 'admin' or user.is_superuser %}
+                    <li><a href="{% url 'courses:course_list' %}" {% if 'courses' in request.path %}class="active"{% endif %}><i class="fas fa-book"></i> Course</a></li>
+                    <li><a href="{% url 'batch_list' %}" {% if 'batches' in request.path %}class="active"{% endif %}><i class="fas fa-layer-group"></i> Batch</a></li>
+                    <li><a href="{% url 'teacher_list' %}" {% if 'teachers' in request.path %}class="active"{% endif %}><i class="fas fa-chalkboard-teacher"></i> Teacher</a></li>
+                    <li><a href="{% url 'student_list' %}" {% if 'students' in request.path %}class="active"{% endif %}><i class="fas fa-user-graduate"></i> Student</a></li>
+                    <li><a href="{% url 'attendance:attendance_session_list' %}" {% if 'attendance' in request.path %}class="active"{% endif %}><i class="fas fa-calendar-check"></i> Attendance</a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> Exam</a></li>
+                    <li><a href="#"><i class="fas fa-tasks"></i> Assignment</a></li>
+                    <li class="dropdown">
+                        <a href="{% url 'noticeboard:notice_list' %}" {% if 'noticeboard' in request.path %}class="active"{% endif %}><i class="fas fa-bell"></i> Notice Board</a>
+                        <ul class="dropdown-submenu">
+                            <li><a href="{% url 'noticeboard:notice_list' %}"><i class="fas fa-list"></i> View Notices</a></li>
+                            <li><a href="{% url 'noticeboard:create_notice' %}"><i class="fas fa-plus"></i> Create Notice</a></li>
+                        </ul>
+                    </li>
+                
+                {% elif user.role == 'teacher' %}
+                    <li><a href="{% url 'attendance:teacher_attendance' %}"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+                    <li><a href="{% url 'attendance:teacher_exams' %}"><i class="fas fa-file-alt"></i> Exams</a></li>
+                    <li><a href="{% url 'attendance:teacher_assignments' %}"><i class="fas fa-tasks"></i> Assignments</a></li>
+                    <li class="dropdown">
+                        <a href="{% url 'noticeboard:notice_list' %}" {% if 'noticeboard' in request.path %}class="active"{% endif %}><i class="fas fa-bell"></i> Notice Board</a>
+                        <ul class="dropdown-submenu">
+                            <li><a href="{% url 'noticeboard:notice_list' %}"><i class="fas fa-list"></i> View Notices</a></li>
+                            <li><a href="{% url 'noticeboard:teacher_create_notice' %}"><i class="fas fa-plus"></i> Create Notice</a></li>
+                        </ul>
+                    </li>
+                
+                {% elif user.role == 'student' %}
+                    <li><a href="{% url 'courses:student_subjects' %}"><i class="fas fa-book"></i> My Subjects</a></li>
+                    <li><a href="{% url 'attendance:student_attendance_records' %}"><i class="fas fa-calendar-check"></i> My Attendance</a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> Exams</a></li>
+                    <li><a href="#"><i class="fas fa-tasks"></i> Assignments</a></li>
+                    <li><a href="#"><i class="fas fa-chart-line"></i> Grades</a></li>
+                    <li class="dropdown">
+                        <a href="{% url 'noticeboard:notice_list' %}" {% if 'noticeboard' in request.path %}class="active"{% endif %}><i class="fas fa-bell"></i> Notice Board</a>
+                        <ul class="dropdown-submenu">
+                            <li><a href="{% url 'noticeboard:notice_list' %}"><i class="fas fa-list"></i> View Notices</a></li>
+                            <!-- Students only have View option -->
+                        </ul>
+                    </li>
+                
+                {% elif user.role == 'guardian' %}
+                    <li><a href="{% url 'guardian_dashboard' %}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="{% url 'attendance:guardian_students_attendance' %}"><i class="fas fa-user-graduate"></i> My Ward</a></li>
+                    <li><a href="{% url 'attendance:guardian_students_attendance' %}" {% if 'guardian' in request.path and 'attendance' in request.path %}class="active"{% endif %}><i class="fas fa-calendar-check"></i> Attendance</a></li>
+                    <li><a href="#"><i class="fas fa-chart-line"></i> Grades</a></li>
+                    <li><a href="#"><i class="fas fa-file-invoice-dollar"></i> Fees</a></li>
+                    <li class="dropdown">
+                        <a href="{% url 'noticeboard:notice_list' %}" {% if 'noticeboard' in request.path %}class="active"{% endif %}><i class="fas fa-bell"></i> Notice Board</a>
+                        <ul class="dropdown-submenu">
+                            <li><a href="{% url 'noticeboard:notice_list' %}"><i class="fas fa-list"></i> View Notices</a></li>
+                            <!-- Guardians only have View option -->
+                        </ul>
+                    </li>
+                
+                {% endif %}
+            </ul>
+        {% endif %}
+
+        <!-- Right: Profile Dropdown -->
+        {% if user.is_authenticated %}
+            <div class="profile-dropdown">
+                <button class="profile-btn">
+                    <i class="fas fa-user-circle"></i>
+                    {{ user.get_full_name|default:user.email }}
+                    <small>({{ user.get_role_display|default:user.role }})</small>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'profile' %}"><i class="fas fa-user"></i> View Profile</a>
+                    <a href="{% url 'change_password' %}"><i class="fas fa-key"></i> Change Password</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'logout' %}" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        {% endif %}
+    </nav>
+
+    <main>
+        <!-- Display Django messages -->
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+                {% if forloop.last %}
+                <div class="message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Session - {{ session.session_id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-list-container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .page-header { background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .form-container { background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; font-weight: 600; color: #2c3e50; margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 0.75rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;
+        transition: all 0.3s ease; box-sizing: border-box;
+    }
+    .form-actions { display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
+    .btn-save { background: #3498db; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+    .btn-save:hover { background: #2980b9; }
+    .btn-cancel { background: #95a5a6; color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-list-container">
+    <div class="page-header">
+        <h1><i class="fas fa-edit"></i> Edit Attendance Session</h1>
+        <p class="text-muted">Updating Session ID: <strong>{{ session.session_id }}</strong></p>
+    </div>
+
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ field.errors }}</div>{% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Update Session</button>
+                <a href="{% url 'attendance:attendance_session_list' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

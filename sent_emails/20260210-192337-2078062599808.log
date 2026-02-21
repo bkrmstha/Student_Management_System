@@ -1,0 +1,29 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Your School Management System Account
+From: noreply@yourschool.com
+To: unishphyal@gmail.com
+Date: Tue, 10 Feb 2026 13:38:37 -0000
+Message-ID: <177073071707.33360.5204182417918489989@Rozan.worldlink.com.np>
+
+
+    Dear Unish Phyal,
+    
+    Your account has been successfully created in the School Management System.
+    
+    Account Details:
+    - Email: unishphyal@gmail.com
+    - Default Password: Teacher@123
+    - Role: Teacher
+    
+    Please login at: http://localhost:8000/login/
+    
+    Important: 
+    1. This is your default password. 
+    2. Please change your password immediately after first login for security.
+    
+    Best regards,
+    School Administration Team
+    
+-------------------------------------------------------------------------------

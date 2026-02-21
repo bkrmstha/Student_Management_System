@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+
+{% block title %}Batch: {{ batch.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .batch-detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .batch-header {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 1px solid #e1e8ed;
+    }
+
+    .batch-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .batch-title h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .batch-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-edit, .btn-delete, .btn-back, .btn-sync {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-edit:hover {
+        background: #e0a800;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c82333;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+    }
+
+    .btn-sync {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-sync:hover {
+        background: #138496;
+    }
+
+    .batch-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #9b59b6;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: #495057;
+        font-size: 1rem;
+    }
+
+    .sync-notice {
+        background: #e8f4fc;
+        border: 1px solid #b6d4fe;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .sync-notice-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    /* COURSE CARDS WITH IMPROVED LAYOUT */
+    .courses-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e1e8ed;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .section-header h2 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.2rem;
+    }
+
+    .course-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.2rem;
+        border: 1px solid #e1e8ed;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        min-height: 180px; /* Increased for better spacing */
+    }
+
+    .course-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        border-color: #3498db;
+    }
+
+    .course-header {
+        margin-bottom: 1rem;
+    }
+
+    .course-short-name {
+        font-family: monospace;
+        background: #3498db;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+        align-self: flex-start;
+    }
+
+    .course-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        line-height: 1.3;
+        margin-bottom: 0.75rem;
+        /* Handle long course names */
+        display: -webkit-box;
+        /* -webkit-line-clamp: 2; */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 2.6em;
+    }
+
+    .batch-name-display {
+        color: #9b59b6;
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        /* Handle long batch names */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .course-footer {
+        margin-top: auto; /* Push to bottom */
+        padding-top: 0.5rem;
+    }
+
+    .btn-view-students {
+        background: #3498db;
+        color: white;
+        padding: 0.6rem 1rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+        min-height: 36px; /* Fixed height for consistency */
+    }
+
+    .btn-view-students:hover {
+        background: #2980b9;
+        transform: translateY(-1px);
+    }
+
+    .btn-view-students:active {
+        transform: translateY(0);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .stat-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .batch-title {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .batch-actions {
+            justify-content: flex-start;
+        }
+        
+        .sync-notice {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .sync-notice-content {
+            min-width: auto;
+        }
+        
+        .courses-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .section-header h2 {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .batch-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .course-card {
+            min-height: 170px;
+        }
+        
+        .btn-view-students {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="batch-detail-container">
+    <!-- Batch Header Information -->
+    <div class="batch-header">
+        <div class="batch-title">
+            <h1><i class="fas fa-layer-group"></i> {{ batch.name }}</h1>
+            <div class="batch-actions">
+                <a href="{% url 'edit_batch' batch.id %}" class="btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'delete_batch' batch.id %}" class="btn-delete"
+                   onclick="return confirm('Are you sure you want to delete this batch? This action cannot be undone.')">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+                <a href="{% url 'batch_list' %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <div class="batch-info">
+            <div class="info-item">
+                <div class="info-label">Batch Year</div>
+                <div class="info-value">{{ batch.year }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                    {% if batch.is_active %}Active{% else %}Inactive{% endif %}
+                </div>
+            </div>
+            {% if batch.start_date %}
+                <div class="info-item">
+                    <div class="info-label">Start Date</div>
+                    <div class="info-value">{{ batch.start_date|date:"M d, Y" }}</div>
+                </div>
+            {% endif %}
+            {% if batch.end_date %}
+                <div class="info-item">
+                    <div class="info-label">End Date</div>
+                    <div class="info-value">{{ batch.end_date|date:"M d, Y" }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if batch.description %}
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <div class="info-label">Description</div>
+                <div class="info-value">{{ batch.description }}</div>
+            </div>
+        {% endif %}
+
+        <!-- Sync Notice -->
+        {% if needs_sync %}
+        <div class="sync-notice">
+            <div class="sync-notice-content">
+                <i class="fas fa-sync-alt"></i>
+                <div>
+                    <strong>Course sync needed!</strong>
+                    <p>This batch has {{ courses_in_batch }} courses, but there are {{ total_active_courses }} active courses in the system.</p>
+                </div>
+            </div>
+            <a href="?sync_courses=true" class="btn-sync">
+                <i class="fas fa-sync"></i> Sync Courses
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Courses Grid Section -->
+    <div class="courses-section">
+        <div class="section-header">
+            <h2><i class="fas fa-book"></i> Courses in this Batch</h2>
+            <a href="?sync_courses=true" class="btn-sync">
+                <i class="fas fa-sync"></i> Sync Courses
+            </a>
+        </div>
+
+        {% if batch_courses %}
+            <div class="courses-grid">
+                {% for batch_course in batch_courses %}
+                    <div class="course-card">
+                        <!-- Course Header -->
+                        <div class="course-header">
+                            <div class="course-short-name">{{ batch_course.course.short_name }}</div>
+                            <div class="course-name">{{ batch_course.course.name }}</div>
+                        </div>
+                        
+                        <!-- Batch Name -->
+                        <div class="batch-name-display" title="{{ batch.name }}">
+                            <i class="fas fa-layer-group"></i> {{ batch.name }}
+                        </div>
+                        
+                        <!-- View Students Button -->
+                        <div class="course-footer">
+                            <a href="{% url 'course_student_list' batch.id batch_course.course.id %}" 
+                               class="btn-view-students" 
+                               title="View enrolled students">
+                                <i class="fas fa-user-graduate"></i> View Students
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h3>No courses assigned</h3>
+                <p>This batch doesn't have any courses assigned yet.</p>
+                <a href="?sync_courses=true" class="btn-sync" style="margin-top: 1rem;">
+                    <i class="fas fa-sync"></i> Import All Active Courses
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

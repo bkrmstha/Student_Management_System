@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student: {{ student.user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-student-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .delete-warning {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        border: 2px solid #e74c3c;
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        color: #e74c3c;
+        margin-bottom: 1rem;
+    }
+
+    .warning-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .warning-text {
+        color: #495057;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .student-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #2c3e50;
+        width: 120px;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        color: #495057;
+        flex: 1;
+    }
+
+    .student-id-badge {
+        font-family: monospace;
+        background: #e74c3c;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .consequences-warning {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        color: #721c24;
+        text-align: left;
+    }
+
+    .consequences-warning h4 {
+        margin-top: 0;
+        color: #721c24;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-confirm, .btn-cancel {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-confirm {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-confirm:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+
+    @media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-confirm, .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .detail-label {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-student-container">
+    <div class="delete-warning">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1 class="warning-title">Delete Student</h1>
+        <div class="warning-text">
+            <p>Are you sure you want to delete <strong>{{ student.user.get_full_name }}</strong>?</p>
+            <p>This action <strong>cannot be undone</strong> and will permanently remove all student data.</p>
+        </div>
+
+        <!-- Student Details -->
+        <div class="student-details">
+            <div class="detail-row">
+                <span class="detail-label">Student ID:</span>
+                <span class="detail-value">
+                    <span class="student-id-badge">{{ student.student_id }}</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value">{{ student.user.get_full_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">{{ student.user.email }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Batch:</span>
+                <span class="detail-value">{{ student.batch.name }} ({{ student.batch.year }})</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Course:</span>
+                <span class="detail-value">
+                    {% for course in student.enrolled_courses.all %}
+                        {{ course.name }} ({{ course.short_name }})<br>
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Enrollment Date:</span>
+                <span class="detail-value">{{ student.user.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Consequences Warning -->
+        <div class="consequences-warning">
+            <h4><i class="fas fa-exclamation-circle"></i> What will be deleted:</h4>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Student account and login credentials</li>
+                <li>All personal information and contact details</li>
+                <li>Academic records and enrollment information</li>
+                <li>Guardian information and relationships</li>
+                <li>Any uploaded documents or photos</li>
+            </ul>
+            <p style="margin-top: 1rem; font-weight: 600;">This action is irreversible. Please confirm that you want to proceed.</p>
+        </div>
+
+        <!-- Delete Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'view_student' student.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-confirm">
+                    <i class="fas fa-trash"></i> Delete Permanently
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Additional confirmation on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (confirm('⚠️ FINAL WARNING: This will permanently delete "{{ student.user.get_full_name }}" ({{ student.student_id }}).\n\nALL student data including account, information, and records will be removed.\n\nTHIS ACTION CANNOT BE UNDONE!\n\nAre you absolutely sure you want to proceed?')) {
+            this.submit();
+        }
+    });
+</script>
+{% endblock %}

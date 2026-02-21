@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Complete Attendance Report: {{ subject.name }}</h4>
+            <div>
+                <button onclick="window.print()" class="btn btn-light btn-sm">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="sticky-col text-center" style="min-width: 200px;">Student Information</th>
+                            {% for session in sessions %}
+                            <th class="text-center session-header">
+                                <span class="d-block">{{ session.date|date:"M d" }}</span>
+                                <small class="fw-normal text-muted">{{ session.date|date:"D" }}</small>
+                            </th>
+                            {% empty %}
+                            <th class="text-center">No Sessions Found</th>
+                            {% endfor %}
+                            <th class="text-center bg-secondary">Present</th>
+                            <th class="text-center bg-secondary">Total</th>
+                            <th class="text-center bg-secondary">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report_rows %}
+                        <tr>
+                            <td class="sticky-col">
+                                <div class="fw-bold">{{ row.student.user.get_full_name }}</div>
+                                <small class="text-muted">{{ row.student.student_id }}</small>
+                            </td>
+                            {% for status in row.attendance %}
+                            <td class="text-center">
+                                {% if status == 'present' %}
+                                    <span class="badge bg-success-subtle text-success border border-success px-2">P</span>
+                                {% elif status == 'absent' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger px-2">A</span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="text-center fw-bold">{{ row.present_count }}</td>
+                            <td class="text-center">{{ total_sessions }}</td>
+                            <td class="text-center fw-bold">
+                                <span class="{% if row.percent < 75 %}text-danger{% else %}text-success{% endif %}">
+                                    {{ row.percent }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="100%" class="text-center py-4">No students found for this subject.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Table Styling */
+    .table-responsive {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    /* Sticky Column for Student Names */
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        background-color: white !important;
+        z-index: 2;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .table-dark .sticky-col {
+        background-color: #212529 !important;
+    }
+
+    /* Column Sizing */
+    .session-header {
+        min-width: 80px;
+        font-size: 0.85rem;
+    }
+
+    /* Print View Adjustments */
+    @media print {
+        .btn, .card-header { display: none !important; }
+        .table-responsive { overflow: visible !important; }
+        .sticky-col { position: static !important; box-shadow: none !important; }
+    }
+</style>
+{% endblock %}

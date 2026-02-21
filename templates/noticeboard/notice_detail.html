@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ notice.title }} - Notice Board{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notice-detail-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .notice-detail-header {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .notice-detail-title {
+        color: #2c3e50;
+        margin: 0 0 1rem 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .notice-detail-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 1.5rem 0;
+        border-top: 1px solid #ecf0f1;
+        border-bottom: 1px solid #ecf0f1;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+        color: #7f8c8d;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .meta-item strong {
+        color: #2c3e50;
+    }
+
+    .notice-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-priority {
+        background: #f39c12;
+        color: white;
+    }
+
+    .badge-priority.urgent {
+        background: #e74c3c;
+    }
+
+    .badge-priority.high {
+        background: #e67e22;
+    }
+
+    .badge-priority.medium {
+        background: #f39c12;
+    }
+
+    .badge-priority.low {
+        background: #95a5a6;
+    }
+
+    .badge-important {
+        background: #9b59b6;
+        color: white;
+    }
+
+    .notice-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #333;
+        margin: 2rem 0;
+    }
+
+    .attachments-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .attachments-section h3 {
+        color: #2c3e50;
+        margin-top: 0;
+    }
+
+    .attachment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .attachment-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .attachment-item:last-child {
+        border-bottom: none;
+    }
+
+    .attachment-link {
+        color: #3498db;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .attachment-link:hover {
+        text-decoration: underline;
+    }
+
+    .comments-section {
+        margin-top: 2rem;
+    }
+
+    .comments-section h3 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
+
+    .comment-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+
+    .comment-item {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .comment-author {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .comment-date {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+    }
+
+    .comment-text {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .comment-form {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .submit-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        background: #2980b9;
+    }
+
+    .notice-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        font-size: 0.95rem;
+    }
+
+    .action-btn:hover {
+        text-decoration: none;
+    }
+
+    .action-btn.edit {
+        background: #3498db;
+    }
+
+    .action-btn.edit:hover {
+        background: #2980b9;
+    }
+
+    .action-btn.delete {
+        background: #e74c3c;
+    }
+
+    .action-btn.delete:hover {
+        background: #c0392b;
+    }
+
+    .back-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #95a5a6;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: #7f8c8d;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .notice-detail-meta {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notice-detail-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notice-detail-container">
+    <!-- Back Button -->
+    <a href="{% url 'noticeboard:notice_list' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Notice Board
+    </a>
+
+    <!-- Notice Header -->
+    <div class="notice-detail-header">
+        <h1 class="notice-detail-title">{{ notice.title }}</h1>
+
+        <!-- Edit/Delete Actions (Admin or Creator only) -->
+        {% if user.is_admin or user == notice.created_by %}
+            <div class="notice-actions">
+                <a href="{% url 'noticeboard:edit_notice' notice.id %}" class="action-btn edit">
+                    <i class="fas fa-edit"></i> Edit Notice
+                </a>
+                <a href="{% url 'noticeboard:delete_notice' notice.id %}" class="action-btn delete">
+                    <i class="fas fa-trash"></i> Delete Notice
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="notice-badges">
+            <span class="badge badge-priority {{ notice.priority }}">
+                {{ notice.get_priority_display }}
+            </span>
+            {% if notice.is_important %}
+                <span class="badge badge-important">
+                    <i class="fas fa-star"></i> Important
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="notice-detail-meta">
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                <strong>Posted by:</strong> {{ notice.created_by.get_full_name }}
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <strong>Date:</strong> {{ notice.created_at|date:"M d, Y H:i" }}
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-eye"></i>
+                <strong>Views:</strong> {{ notice.get_viewer_count }}
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-comments"></i>
+                <strong>Comments:</strong> {{ notice.comments.count }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice Content -->
+    <div class="notice-content">
+        {{ notice.content|linebreaks }}
+    </div>
+
+    <!-- Attachments -->
+    {% if attachments %}
+        <div class="attachments-section">
+            <h3><i class="fas fa-paperclip"></i> Attachments</h3>
+            <ul class="attachment-list">
+                {% for attachment in attachments %}
+                    <li class="attachment-item">
+                        <a href="{{ attachment.file.url }}" target="_blank" class="attachment-link">
+                            {% if attachment.file.url|lower|slice:"-4:" == '.pdf' %}
+                                <i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
+                            {% elif attachment.file.url|lower|slice:"-4:" in '.jpg,.png,.gif' %}
+                                <i class="fas fa-image" style="color: #3498db;"></i>
+                            {% else %}
+                                <i class="fas fa-file" style="color: #95a5a6;"></i>
+                            {% endif %}
+                            {{ attachment.file.name|truncatechars:50 }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h3><i class="fas fa-comments"></i> Comments ({{ comments.count }})</h3>
+
+        <!-- Comment List -->
+        <ul class="comment-list">
+            {% for comment in comments %}
+                <li class="comment-item">
+                    <div class="comment-header">
+                        <strong class="comment-author">{{ comment.user.get_full_name }}</strong>
+                        <span class="comment-date">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                    <div class="comment-text">
+                        {{ comment.comment|linebreaks }}
+                    </div>
+                </li>
+            {% empty %}
+                <li style="text-align: center; color: #7f8c8d; padding: 2rem;">
+                    No comments yet. Be the first to comment!
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Comment Form -->
+        {% if user_role in 'student,teacher,guardian' %}
+            <div class="comment-form">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="comment" class="form-label">
+                            <i class="fas fa-comment"></i> Add a Comment
+                        </label>
+                        <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="Share your thoughts..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Post Comment
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

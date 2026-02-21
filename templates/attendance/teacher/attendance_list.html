@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Attendance Sessions - Student Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-list-container { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
+    
+    /* Breadcrumb Styling */
+    .breadcrumb { background: transparent; padding: 0; margin-bottom: 1.5rem; display: flex; list-style: none; gap: 10px; }
+    .breadcrumb-item a { color: #3498db; text-decoration: none; }
+    .breadcrumb-item.active { color: #6c757d; }
+    .breadcrumb-item + .breadcrumb-item::before { content: "/"; color: #dee2e6; margin-right: 10px; }
+
+    .attendance-list-header { 
+        margin-bottom: 2rem; 
+        padding-bottom: 1rem; 
+        border-bottom: 2px solid #edf2f7; 
+    }
+    .attendance-list-header h2 { color: #2c3e50; font-weight: 700; margin: 0; font-size: 1.75rem; display: flex; align-items: center; gap: 12px; }
+    
+    .sessions-card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; overflow: hidden; }
+    .sessions-list-table { width: 100%; border-collapse: collapse; }
+    .sessions-list-table th { 
+        background: #f8fafc; 
+        color: #64748b; 
+        padding: 1rem 1.5rem; 
+        font-weight: 500; /* Changed from 600 to 500 (not bold) */
+        font-size: 0.85rem; 
+        text-transform: uppercase; 
+        border-bottom: 1px solid #e2e8f0; 
+    }
+    .sessions-list-table td { 
+        padding: 1.2rem 1.5rem; 
+        border-bottom: 1px solid #f1f5f9; 
+        vertical-align: middle; 
+        font-weight: 400; /* Ensure normal weight for td */
+    }
+    
+    /* Center aligned text for all table headers */
+    .sessions-list-table th { text-align: center; }
+    
+    /* Action Buttons */
+    .action-group { display: flex; justify-content: center; gap: 8px; }
+    .btn-action { padding: 0.5rem 1rem; border-radius: 8px; font-weight: 500; text-decoration: none; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
+    
+    .btn-mark { background: #27ae60; color: white !important; }
+    .btn-mark:hover { background: #219150; transform: translateY(-1px); }
+
+    .btn-report { background: #3498db; color: white !important; }
+    .btn-report:hover { background: #2980b9; transform: translateY(-1px); }
+
+    /* Record Count Badge */
+    .record-count { 
+        background: #eff6ff; 
+        color: #2563eb; 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        font-weight: 500; /* Changed from 700 to 500 (not bold) */
+        font-size: 0.8rem; 
+        display: inline-block; 
+    }
+    
+    /* Center aligned text for table cells */
+    .center-text { 
+        text-align: center; 
+        font-weight: 400; /* Ensure normal weight */
+    }
+    .batch-cell, .semester-cell, .subject-cell, .date-cell { 
+        text-align: center; 
+        font-weight: 400; /* Ensure normal weight */
+    }
+    
+    /* Batch, Semester and Subject styling - REMOVED BOLD */
+    .batch-name { 
+        color: #1e293b; 
+        font-size: 1rem; 
+        font-weight: 400; /* Changed from 700 to 400 (not bold) */
+    }
+    .semester-name { 
+        color: #475569; 
+        font-size: 0.95rem; 
+        font-weight: 400; /* Changed from 600 to 400 (not bold) */
+    }
+    .subject-name { 
+        color: #475569; 
+        font-size: 0.95rem; 
+        font-weight: 400; /* Ensure normal weight */
+    }
+    
+    /* Date styling - remove bold */
+    .date-cell span {
+        color: #475569;
+        font-weight: 400; /* Changed from 500 to 400 (not bold) */
+    }
+
+    @media (max-width: 992px) { 
+        .action-group { flex-direction: column; align-items: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="attendance-list-container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Attendance Sessions</li>
+        </ol>
+    </nav>
+
+    <div class="attendance-list-header">
+        <h2><i class="fas fa-calendar-check" style="color: #3498db;"></i> My Attendance Sessions</h2>
+    </div>
+
+    <div class="sessions-card">
+        <table class="sessions-list-table">
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Semester</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Total Records</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if sessions %}
+                    {% for session in sessions %}
+                    <tr>
+                        <td class="batch-cell center-text">
+                            <div class="batch-name">{{ session.batch.name }}</div>
+                        </td>
+                        <td class="semester-cell center-text">
+                            <div class="semester-name">
+                                {% if session.course.course_type == 'semester' %}
+                                    {% if session.subject.semester %}
+                                        Semester {{ session.subject.semester }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% elif session.course.course_type == 'yearly' %}
+                                    {% if session.subject.year %}
+                                        Year {{ session.subject.year }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="subject-cell center-text">
+                            <div class="subject-name">{{ session.subject.name }}</div>
+                        </td>
+                        <td class="date-cell center-text">
+                            <span>{{ session.date|date:"M d Y" }}</span>
+                        </td>
+                        <td class="center-text">
+                            <span class="record-count">
+                                {{ session.attendance_records.count|default:0 }} Records
+                            </span>
+                        </td>
+                        <td class="center-text">
+                            <div class="action-group">
+                                <a href="{% url 'attendance:take_attendance' session.pk %}" class="btn-action btn-mark">
+                                    <i class="fas fa-check"></i> Mark
+                                </a>
+                                
+                                <a href="{% url 'attendance:datewise_attendance_report' session.id %}" class="btn-action btn-report">
+                                    <i class="fas fa-chart-bar"></i> Report
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                            No attendance sessions assigned to you
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

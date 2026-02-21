@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Subject Attendance Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #3498db;
+        --dark-navy: #2c3e50;
+        --bg-light: #f4f7f6;
+        --success-green: #27ae60;
+        --danger-red: #e74c3c;
+    }
+
+    .report-container {
+        padding: 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+    }
+
+    /* Summary Header */
+    .report-header {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+        border-top: 5px solid var(--primary-blue);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .subject-title h1 {
+        font-size: 1.8rem;
+        color: var(--dark-navy);
+        margin-bottom: 5px;
+    }
+
+    .report-stats {
+        display: flex;
+        gap: 30px;
+    }
+
+    .stat-box {
+        text-align: center;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #7f8c8d;
+        display: block;
+    }
+
+    .stat-number {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+    }
+
+    /* Table Section */
+    .table-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .report-table th {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--dark-navy);
+        border-bottom: 2px solid #edf2f7;
+    }
+
+    .report-table td {
+        padding: 15px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    /* Progress Bar */
+    .progress-bar-bg {
+        background: #ecf0f1;
+        border-radius: 10px;
+        height: 10px;
+        width: 120px;
+        display: inline-block;
+        margin-right: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 10px;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .badge-eligible { background: #d1f2eb; color: var(--success-green); }
+    .badge-shortage { background: #fadbd8; color: var(--danger-red); }
+
+    .btn-back {
+        text-decoration: none;
+        color: var(--primary-blue);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <a href="javascript:history.back()" class="btn-back">
+        <i class="fas fa-arrow-left me-2"></i> Back to Session Records
+    </a>
+
+    <div class="report-header">
+        <div class="subject-title">
+            <h1><i class="fas fa-chart-pie me-2"></i> {{ subject.name }}</h1>
+            <p class="text-muted mb-0">Course: {{ subject.course.name }} | Total Sessions Conducted: <strong>{{ sessions.count }}</strong></p>
+        </div>
+        <div class="report-stats">
+            <div class="stat-box">
+                <span class="stat-label">Subject Code</span>
+                <span class="stat-number">{{ subject.code }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Min. Required</span>
+                <span class="stat-number text-primary">75%</span>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <div class="table-card">
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Attendance (P/T)</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in report_data %}
+                <tr>
+                    <td><span class="fw-bold">#{{ data.student.student_id }}</span></td>
+                    <td>{{ data.student.user.get_full_name }}</td>
+                    <td>
+                        <span class="text-success fw-bold">{{ data.present }}</span> 
+                        <span class="text-muted">/ {{ data.total }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" 
+                                     style="width: {{ data.percent }}%; 
+                                     background-color: {% if data.percent >= 75 %}#27ae60{% elif data.percent >= 60 %}#f39c12{% else %}#e74c3c{% endif %};">
+                                </div>
+                            </div>
+                            <span class="fw-bold">{{ data.percent }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if data.percent >= 75 %}
+                            <span class="status-badge badge-eligible"><i class="fas fa-check-circle me-1"></i> Eligible</span>
+                        {% else %}
+                            <span class="status-badge badge-shortage"><i class="fas fa-exclamation-triangle me-1"></i> Shortage</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">No records found for this subject.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

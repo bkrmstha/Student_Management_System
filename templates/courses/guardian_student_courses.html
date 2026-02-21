@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.user.get_full_name }}'s Courses{% endblock %}
+
+{% block extra_css %}
+<style>
+    .courses-container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+    .page-header { margin-bottom: 2rem; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; }
+    .back-btn { display: inline-block; padding: 0.5rem 1rem; background: #95a5a6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: all 0.2s; }
+    .back-btn:hover { background: #7f8c8d; text-decoration: none; }
+    .page-title { color: #2c3e50; font-size: 1.8rem; margin-bottom: 0.25rem; font-weight: 600; }
+    .page-subtitle { color: #7f8c8d; font-size: 0.95rem; }
+    .ward-info { background: #ecf0f1; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap; align-items: center; }
+    .ward-badge { display: inline-block; padding: 0.4rem 0.8rem; background: #9b59b6; color: white; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
+    
+    .controls-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+    .stats-bar { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .stat-badge { padding: 0.5rem 1rem; background: #ecf0f1; border-radius: 20px; font-size: 0.9rem; color: #2c3e50; font-weight: 500; }
+    .stat-badge.active { background: #3498db; color: white; }
+    
+    .filters-section { background: white; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .filter-group { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .filter-input { padding: 0.6rem 1rem; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; font-size: 0.95rem; }
+    .filter-input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+    .filter-btn { padding: 0.6rem 1.5rem; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .filter-btn:hover { background: #2980b9; }
+    
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    
+    .course-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.08); transition: all 0.3s ease; cursor: pointer; }
+    .course-card:hover { box-shadow: 0 5px 20px rgba(0,0,0,0.12); transform: translateY(-5px); }
+    
+    .course-card-header { margin-bottom: 1rem; }
+    .course-type { display: inline-block; padding: 0.35rem 0.75rem; background: #f39c12; color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .course-type.yearly { background: #e74c3c; }
+    
+    .course-name { color: #2c3e50; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .course-short-name { color: #7f8c8d; font-size: 0.9rem; }
+    
+    .course-card-body { margin: 1rem 0; padding: 1rem 0; border-top: 1px solid #ecf0f1; border-bottom: 1px solid #ecf0f1; }
+    .course-stat { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; color: #555; font-size: 0.9rem; }
+    .course-stat-label { color: #7f8c8d; }
+    .course-stat-value { font-weight: 600; color: #2c3e50; }
+    
+    .course-footer { margin-top: 1rem; }
+    .view-btn { display: inline-block; padding: 0.6rem 1.2rem; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: all 0.2s; }
+    .view-btn:hover { background: #2980b9; text-decoration: none; }
+    
+    .empty-state { text-align: center; padding: 3rem 1rem; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-title { color: #2c3e50; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .empty-text { color: #7f8c8d; font-size: 0.95rem; }
+    
+    @media (max-width: 768px) {
+        .page-title { font-size: 1.5rem; }
+        .courses-grid { grid-template-columns: 1fr; }
+        .controls-section { flex-direction: column; align-items: flex-start; }
+        .filter-group { flex-direction: column; }
+        .filter-input { width: 100%; min-width: auto; }
+        .header-top { flex-direction: column; }
+        .ward-info { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="courses-container">
+    <div class="page-header">
+        <div class="header-top">
+            <div>
+                <h1 class="page-title">📚 {{ student.user.get_full_name }}'s Courses</h1>
+                <p class="page-subtitle">View all enrolled courses</p>
+            </div>
+            <a href="{% url 'guardian_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <!-- Ward Information -->
+    <div class="ward-info">
+        <div>
+            <span class="ward-badge">🔗 Ward</span>
+        </div>
+        <div>
+            <strong>Student ID:</strong> {{ student.student_id }}
+        </div>
+        <div>
+            <strong>Batch:</strong> {{ student.batch.name|default:"Not assigned" }}
+        </div>
+    </div>
+    
+    <!-- Stats Bar -->
+    <div class="controls-section">
+        <div class="stats-bar">
+            <div class="stat-badge active">Total: {{ total_count }}</div>
+            {% if semester_count > 0 %}
+                <div class="stat-badge">Semester-based: {{ semester_count }}</div>
+            {% endif %}
+            {% if yearly_count > 0 %}
+                <div class="stat-badge">Yearly-based: {{ yearly_count }}</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="filters-section">
+        <form method="GET" class="filter-group">
+            <input type="text" name="search" class="filter-input" placeholder="Search courses by name or code..." value="{{ search_query }}">
+            
+            <select name="type" class="filter-input">
+                <option value="">All Types</option>
+                <option value="semester" {% if type_filter == 'semester' %}selected{% endif %}>Semester-based</option>
+                <option value="yearly" {% if type_filter == 'yearly' %}selected{% endif %}>Yearly-based</option>
+            </select>
+            
+            <button type="submit" class="filter-btn">🔍 Filter</button>
+            
+            {% if search_query or type_filter %}
+                <a href="{% url 'courses:guardian_student_courses' student.id %}" class="filter-btn" style="background: #95a5a6;">Clear Filters</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- Courses Grid -->
+    {% if courses %}
+        <div class="courses-grid">
+            {% for course in courses %}
+                <div class="course-card">
+                    <div class="course-card-header">
+                        <span class="course-type {% if course.course_type == 'yearly' %}yearly{% endif %}">
+                            {{ course.get_course_type_display }}
+                        </span>
+                        <div class="course-name">{{ course.name }}</div>
+                        <div class="course-short-name">{{ course.short_name }}</div>
+                    </div>
+                    
+                    <div class="course-card-body">
+                        {% with subjects_count=course.subjects.count %}
+                            <div class="course-stat">
+                                <span class="course-stat-label">📚 Subjects:</span>
+                                <span class="course-stat-value">{{ subjects_count }}</span>
+                            </div>
+                        {% endwith %}
+                        
+                        {% with enrolled_count=course.student_enrollments|length %}
+                            <div class="course-stat">
+                                <span class="course-stat-label">👥 Enrolled:</span>
+                                <span class="course-stat-value">{{ enrolled_count }}</span>
+                            </div>
+                        {% endwith %}
+                    </div>
+                    
+                    <div class="course-footer">
+                        <a href="{% url 'courses:guardian_course_subjects' student.id course.id %}" class="view-btn">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <div class="empty-title">No Courses Found</div>
+            <div class="empty-text">
+                {% if search_query or type_filter %}
+                    No courses match your filters. <a href="{% url 'courses:guardian_student_courses' student.id %}">View all courses</a>
+                {% else %}
+                    This ward is not enrolled in any courses yet.
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

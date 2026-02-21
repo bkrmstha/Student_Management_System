@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}All Students{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-list-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .students-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow-x: auto;
+    }
+
+    .section-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .student-count {
+        background: #3498db;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    /* Search and Filter Form - Single Line on Large Screens */
+    .search-filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        align-items: end;
+    }
+
+    .search-group {
+        flex: 1 1 300px;
+        min-width: 250px;
+        display: flex;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        height: 48px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    }
+
+    .filter-select {
+        flex: 0 1 200px;
+        min-width: 160px;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%236c757d' d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") no-repeat right 1rem center;
+        background-size: 12px;
+        appearance: none;
+        height: 48px;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .search-btn,
+    .clear-btn {
+        padding: 0 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        height: 48px;
+        min-width: 110px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .search-btn {
+        background: #3498db;
+        color: white;
+    }
+
+    .search-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .clear-btn {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .clear-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+    }
+
+    /* Force single line on screens 993px and wider */
+    @media (min-width: 993px) {
+        .search-filter-form {
+            flex-wrap: nowrap;
+        }
+    }
+
+    /* Tablet & Mobile: Stack vertically */
+    @media (max-width: 992px) {
+        .search-filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-group,
+        .filter-select,
+        .form-actions {
+            width: 100%;
+        }
+
+        .form-actions {
+            flex-direction: row;
+        }
+
+        .search-btn,
+        .clear-btn {
+            flex: 1;
+        }
+
+        .student-list-container {
+            padding: 0 0.5rem;
+        }
+
+        .students-section {
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .section-header h2 {
+                font-size: 1.3rem;
+            }
+        }
+    }
+
+    /* Table Styles */
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+    .students-table th {
+        background: #3498db;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .students-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e1e8ed;
+        color: #495057;
+        vertical-align: middle;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .students-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .student-id {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .student-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .student-email {
+        color: #3498db;
+        word-break: break-all;
+    }
+
+    .student-phone {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .student-address {
+        max-width: 200px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        word-break: break-all;
+    }
+
+    .action-buttons-cell {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .btn-view, .btn-edit, .btn-delete {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        border: 2px solid transparent;
+    }
+
+    .btn-view { background: #3498db; color: white; border-color: #2980b9; }
+    .btn-view:hover { background: #2980b9; transform: translateY(-2px); }
+
+    .btn-edit { background: #f39c12; color: white; border-color: #d68910; }
+    .btn-edit:hover { background: #d68910; transform: translateY(-2px); }
+
+    .btn-delete { background: #e74c3c; color: white; border-color: #c0392b; }
+    .btn-delete:hover { background: #c0392b; transform: translateY(-2px); }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .view-absent-btn {
+        background: #e74c3c;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: 2px solid #c0392b;
+    }
+
+    .view-absent-btn:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-list-container">
+    <!-- Students Table Section -->
+    <div class="students-section">
+        <div class="section-header">
+            <h2><i class="fas fa-list"></i> All Students</h2>
+            <span class="student-count"><i class="fas fa-users"></i> Total: {{ students.count }}</span>
+        </div>
+
+        <!-- Search and Filter Form -->
+        <form method="get" class="search-filter-form">
+            <div class="search-group">
+                <input type="text"
+                       name="search"
+                       placeholder="Search by name, email, student ID..."
+                       class="search-input"
+                       value="{{ request.GET.search|default:'' }}">
+            </div>
+
+            <select name="batch" class="filter-select">
+                <option value="">All Batches</option>
+                {% for batch_option in batches %}
+                <option value="{{ batch_option.id }}" {% if batch_filter == batch_option.id|stringformat:"s" %}selected{% endif %}>
+                    {{ batch_option.name }} ({{ batch_option.year }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <select name="course" class="filter-select">
+                <option value="">All Courses</option>
+                {% for course_option in courses %}
+                <option value="{{ course_option.id }}" {% if course_filter == course_option.id|stringformat:"s" %}selected{% endif %}>
+                    {{ course_option.name }} ({{ course_option.short_name }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <div class="form-actions">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                {% if request.GET %}
+                    <a href="{% url 'student_list' %}" class="clear-btn">
+                        <i class="fas fa-redo"></i> Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if students %}
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>S.N</th>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Batch</th>
+                        <th>Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><span class="student-id">{{ student.student_id }}</span></td>
+                        <td><div class="student-name">{{ student.user.get_full_name }}</div></td>
+                        <td><a href="mailto:{{ student.user.email }}" class="student-email">{{ student.user.email }}</a></td>
+                        <td><span class="student-phone">{{ student.user.phone_number|default:"-" }}</span></td>
+                        <td><span style="font-weight: 500;">{{ student.batch.name|default:"-" }}</span></td>
+                        <td><div class="student-address">{{ student.address|default:"-"|truncatechars:30 }}</div></td>
+                        <td>
+                            <div class="action-buttons-cell">
+                                <a href="{% url 'view_student' student.id %}" class="btn-view" title="View Details"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'edit_student' student.id %}" class="btn-edit" title="Edit Student"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'delete_student' student.id %}" class="btn-delete" title="Delete Student"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-graduate"></i>
+                <h3>No Students Found</h3>
+                <p>No students found matching your criteria.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

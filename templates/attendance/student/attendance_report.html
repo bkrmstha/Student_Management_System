@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block title %}My Attendance Report - Student Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #3498db;
+        --dark-navy: #2c3e50;
+        --success-green: #27ae60;
+        --danger-red: #e74c3c;
+        --warning-orange: #f39c12;
+        --info-cyan: #3498db;
+        --bg-light: #f4f7f6;
+    }
+
+    .attendance-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+    }
+
+    /* Header Section */
+    .attendance-header {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+        border-left: 5px solid var(--primary-blue);
+    }
+
+    .attendance-header h1 {
+        color: var(--dark-navy);
+        margin: 0 0 15px 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .attendance-header p {
+        margin: 5px 0;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .student-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .info-item {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin-top: 5px;
+    }
+
+    /* Summary statistics removed per user request */
+
+    /* Detailed Reports Table */
+    .reports-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    .table {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table th {
+        padding: 15px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--dark-navy);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        padding: 15px;
+        border-bottom: 1px solid #ecf0f1;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .subject-name {
+        text-align: left;
+        font-weight: 600;
+        color: var(--dark-navy);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .status-badge.present {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.absent {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* removed late/leave badges */
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.6;
+    }
+
+    .empty-state-text {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .empty-state-subtext {
+        color: #999;
+        font-size: 0.95rem;
+        margin-top: 10px;
+    }
+
+    /* Action Buttons */
+    .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-info {
+        background-color: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-info:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    /* Note Section */
+    .note-section {
+        margin-top: 25px;
+        padding: 15px 20px;
+        background: #ecf7ff;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .note-section strong {
+        color: var(--dark-navy);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .attendance-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .student-info {
+            grid-template-columns: 1fr;
+        }
+
+        .report-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table th, .table td {
+            padding: 10px 5px;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="attendance-container">
+    <!-- Header -->
+    <div class="attendance-header">
+        <h1><i class="fas fa-chart-pie" style="color: var(--primary-blue);"></i> My Attendance Report</h1>
+        <div class="student-info">
+            <div class="info-item">
+                <div class="info-label">Student Name</div>
+                <div class="info-value">{{ student.user.get_full_name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Student ID</div>
+                <div class="info-value">{{ student.student_id }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Batch</div>
+                <div class="info-value">{{ student.batch.name }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if reports %}
+        <!-- Detailed Reports Table -->
+        <div class="reports-table">
+            <h2 style="padding: 20px 20px 15px 20px; color: var(--dark-navy); margin: 0; font-size: 1.3rem;">
+                <i class="fas fa-list"></i> Subject-wise Attendance
+            </h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Total Classes</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Percentage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                        <tr>
+                            <td class="subject-name">{{ report.subject.name }}</td>
+                            <td>{{ report.subject.teacher.full_name|default:"N/A" }}</td>
+                            <td>{{ report.total_sessions }}</td>
+                            <td>
+                                <span class="status-badge present">{{ report.present_count }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge absent">{{ report.absent_count }}</span>
+                            </td>
+                            <td>
+                                {% if report.attendance_percentage >= 75 %}
+                                    <span class="percentage-display">{{ report.attendance_percentage|floatformat:1 }}%</span>
+                                {% elif report.attendance_percentage >= 50 %}
+                                    <span class="percentage-display warning">{{ report.attendance_percentage|floatformat:1 }}%</span>
+                                {% else %}
+                                    <span class="percentage-display critical">{{ report.attendance_percentage|floatformat:1 }}%</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'attendance:student_subject_attendance_detail' report.subject.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="note-section">
+            <strong><i class="fas fa-info-circle"></i> Important Note:</strong> Maintain at least 75% attendance to avoid academic penalties. For any discrepancies, please contact your class teacher or administrator.
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <p class="empty-state-text">No attendance records found yet.</p>
+            <p class="empty-state-subtext">Your attendance reports will appear here once sessions are recorded by your instructors.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% comment %} Removed client-side aggregation for late/leave statuses. Server provides totals. {% endcomment %}

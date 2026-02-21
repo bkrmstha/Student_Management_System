@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    .add-course-container {
+        max-width: 600px;
+        margin: 1.5rem auto; /* Reduced margin */
+        padding: 0 1.5rem; /* Increased side padding */
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 1.5rem; /* Reduced */
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #3498db;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        font-size: 1.8rem; /* Reduced */
+        margin-bottom: 0.3rem; /* Reduced */
+        font-weight: 600;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        font-size: 1rem; /* Reduced */
+    }
+
+    .course-form {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem; /* Reduced */
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* Lighter shadow */
+    }
+
+    .form-section {
+        margin-bottom: 2rem; /* Reduced */
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem; /* Reduced */
+        margin-bottom: 1.2rem; /* Reduced */
+        padding-left: 0.5rem;
+        border-left: 3px solid #3498db; /* Thinner */
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: #3498db;
+        font-size: 1.1rem;
+    }
+
+    .form-group {
+        padding : 0 25px 0 0;
+        margin-bottom: 1.2rem; /* Reduced */
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.4rem; /* Reduced */
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.9rem; /* Reduced */
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #e74c3c;
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        padding: 0.7rem 0.8rem; /* Reduced */
+        border: 1px solid #e0e0e0; /* Thinner border */
+        border-radius: 6px;
+        font-size: 0.9rem; /* Reduced */
+        transition: all 0.2s; /* Faster transition */
+        background: white;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1); /* Smaller shadow */
+    }
+
+    .form-help {
+        color: #7f8c8d;
+        font-size: 0.8rem; /* Reduced */
+        margin-top: 0.4rem; /* Reduced */
+        font-style: italic;
+    }
+
+    .form-error {
+        color: #e74c3c;
+        font-size: 0.8rem; /* Reduced */
+        margin-top: 0.4rem; /* Reduced */
+    }
+
+    .error-input {
+        border-color: #e74c3c !important;
+    }
+
+    .error-input:focus {
+        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important; /* Smaller shadow */
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.8rem; /* Reduced */
+        justify-content: center;
+        margin-top: 1.5rem; /* Reduced */
+        padding-top: 1.5rem; /* Reduced */
+        border-top: 1px solid #f0f0f0; /* Thinner border */
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #3498db, #2980b9); /* Gradient like other forms */
+        color: white;
+        padding: 0.8rem 1.5rem; /* Reduced */
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem; /* Reduced */
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 180px; /* Reduced */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #2980b9, #1c6ea4);
+        transform: translateY(-1px); /* Smaller effect */
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); /* Better shadow */
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        color: white;
+        padding: 0.8rem 1.5rem; /* Reduced */
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem; /* Reduced */
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        text-align: center;
+        min-width: 180px; /* Reduced */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .cancel-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-1px); /* Smaller effect */
+        box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3); /* Better shadow */
+    }
+
+    /* Required field styling */
+    .required-field {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    /* Field character counter (optional) */
+    .char-counter {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        text-align: right;
+        margin-top: 0.2rem;
+    }
+
+    .char-counter.warning {
+        color: #f39c12;
+    }
+
+    .char-counter.error {
+        color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+        .add-course-container {
+            padding: 0 1rem;
+            margin: 1rem auto;
+        }
+        
+        .course-form {
+            padding: 1.2rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .form-header p {
+            font-size: 0.9rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
+            min-width: auto;
+            padding: 0.7rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .add-course-container {
+            padding: 0 0.5rem;
+        }
+        
+        .course-form {
+            padding: 1rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .form-header p {
+            font-size: 0.85rem;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+        }
+        
+        .form-input,
+        .form-select {
+            padding: 0.6rem 0.7rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="add-course-container">
+    <div class="form-header">
+        <h1>Add New Course</h1>
+        <p>Fill in the course details below</p>
+    </div>
+
+    <form method="post" class="course-form" id="courseForm">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-book"></i> Course Information
+            </h2>
+
+            <!-- Course Name -->
+            <div class="form-group">
+                <label for="course_name" class="form-label required">
+                    Course Name
+                </label>
+                <input type="text"
+                       name="name"
+                       id="course_name"
+                       class="form-input {% if form.name.errors %}error-input{% endif %}"
+                       placeholder="Enter full course name"
+                       value="{{ form.name.value|default:'' }}"
+                       required
+                       maxlength="200">
+                <div class="char-counter" id="courseNameCounter">
+                    <span id="courseNameChars">0</span>/200
+                </div>
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Full name of the course (e.g., Bachelor of Computer Science)</div>
+            </div>
+
+            <!-- Short Name -->
+            <div class="form-group">
+                <label for="short_name" class="form-label required">
+                    Short Name / Abbreviation
+                </label>
+                <input type="text"
+                       name="short_name"
+                       id="short_name"
+                       class="form-input {% if form.short_name.errors %}error-input{% endif %}"
+                       placeholder="e.g., BCS, BCA, BBA"
+                       value="{{ form.short_name.value|default:'' }}"
+                       required
+                       maxlength="50">
+                <div class="char-counter" id="shortNameCounter">
+                    <span id="shortNameChars">0</span>/50
+                </div>
+                {% if form.short_name.errors %}
+                <div class="form-error">{{ form.short_name.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Short abbreviation for the course (must be unique)</div>
+            </div>
+
+            <!-- Course Type -->
+            <div class="form-group">
+                <label for="course_type" class="form-label required">
+                    Course Type
+                </label>
+                <select name="course_type"
+                        id="course_type"
+                        class="form-select {% if form.course_type.errors %}error-input{% endif %}"
+                        required>
+                    <option value="">Select Course Type</option>
+                    <option value="semester" {% if form.course_type.value == 'semester' %}selected{% endif %}>Semester-based</option>
+                    <option value="yearly" {% if form.course_type.value == 'yearly' %}selected{% endif %}>Yearly-based</option>
+                </select>
+                {% if form.course_type.errors %}
+                <div class="form-error">{{ form.course_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Create Course
+            </button>
+            <a href="{% url 'courses:course_list' %}" class="cancel-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Character counters
+    document.getElementById('course_name').addEventListener('input', function(e) {
+        const length = this.value.length;
+        const counter = document.getElementById('courseNameChars');
+        const counterDiv = document.getElementById('courseNameCounter');
+        
+        counter.textContent = length;
+        
+        if (length > 190) {
+            counterDiv.classList.add('warning');
+            counterDiv.classList.remove('error');
+        } else if (length >= 200) {
+            counterDiv.classList.remove('warning');
+            counterDiv.classList.add('error');
+        } else {
+            counterDiv.classList.remove('warning', 'error');
+        }
+    });
+
+    document.getElementById('short_name').addEventListener('input', function(e) {
+        const length = this.value.length;
+        const counter = document.getElementById('shortNameChars');
+        const counterDiv = document.getElementById('shortNameCounter');
+        
+        counter.textContent = length;
+        
+        if (length > 45) {
+            counterDiv.classList.add('warning');
+            counterDiv.classList.remove('error');
+        } else if (length >= 50) {
+            counterDiv.classList.remove('warning');
+            counterDiv.classList.add('error');
+        } else {
+            counterDiv.classList.remove('warning', 'error');
+        }
+        
+        // Auto-uppercase
+        this.value = this.value.toUpperCase();
+    });
+
+    // Initialize counters
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('course_name').dispatchEvent(new Event('input'));
+        document.getElementById('short_name').dispatchEvent(new Event('input'));
+    });
+
+    // Form validation
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        const courseName = document.getElementById('course_name').value.trim();
+        const shortName = document.getElementById('short_name').value.trim();
+        const courseType = document.getElementById('course_type').value;
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll('.field-error').forEach(error => error.remove());
+        document.querySelectorAll('.form-input, .form-select').forEach(field => {
+            field.classList.remove('error-input');
+        });
+
+        // Validate Course Name
+        if (!courseName) {
+            showError('course_name', 'Course name is required');
+            isValid = false;
+        } else if (courseName.length < 3) {
+            showError('course_name', 'Course name must be at least 3 characters');
+            isValid = false;
+        }
+
+        // Validate Short Name
+        if (!shortName) {
+            showError('short_name', 'Short name is required');
+            isValid = false;
+        } else if (shortName.length < 2) {
+            showError('short_name', 'Short name must be at least 2 characters');
+            isValid = false;
+        } else if (!/^[A-Za-z0-9\s\-]+$/.test(shortName)) {
+            showError('short_name', 'Short name can only contain letters, numbers, spaces, and hyphens');
+            isValid = false;
+        }
+
+        // Validate Course Type
+        if (!courseType) {
+            showError('course_type', 'Please select a course type');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.error-input');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+
+    // Real-time validation for short name uniqueness
+    let shortNameTimeout;
+    document.getElementById('short_name').addEventListener('blur', function() {
+        clearTimeout(shortNameTimeout);
+        const shortName = this.value.trim();
+        
+        if (shortName.length >= 2) {
+            shortNameTimeout = setTimeout(() => {
+                // You would typically make an AJAX call here to check uniqueness
+                // For now, we'll just clear any existing error
+                clearError('short_name');
+            }, 500);
+        }
+    });
+
+    // Helper functions
+    function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        field.classList.add('error-input');
+        
+        let errorDiv = field.parentNode.querySelector('.field-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'form-error field-error';
+            errorDiv.textContent = message;
+            field.parentNode.insertBefore(errorDiv, field.nextSibling);
+        } else {
+            errorDiv.textContent = message;
+        }
+    }
+
+    function clearError(fieldId) {
+        const field = document.getElementById(fieldId);
+        field.classList.remove('error-input');
+        
+        const errorDiv = field.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+
+    // Check for duplicate names on the client side
+    document.getElementById('course_name').addEventListener('blur', function() {
+        const courseName = this.value.trim();
+        if (courseName.length >= 3) {
+            clearError('course_name');
+        }
+    });
+</script>
+{% endblock %}

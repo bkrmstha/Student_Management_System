@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Guardian Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:900px;margin:2rem auto;">
+    <h1>Guardian Profile</h1>
+    <div style="padding:1rem;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        {% if profile %}
+            <p><strong>Guardian ID:</strong> {{ profile.guardian_id }}</p>
+            <p><strong>Relation:</strong> {{ profile.relation_to_student }}</p>
+            <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+        {% endif %}
+
+        <div style="margin-top:1.5rem;">
+            <a class="btn" href="{% url 'attendance:guardian_students_attendance' %}" style="background:#2c3e50;color:#fff;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;">View My Wards & Attendance</a>
+            <a class="btn" href="{% url 'guardian_dashboard' %}" style="margin-left:1rem;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

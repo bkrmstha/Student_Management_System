@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% block title %}Datewise Attendance Report - Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #3498db;
+        --dark-navy: #2c3e50;
+        --bg-light: #f4f7f6;
+        --success-green: #27ae60;
+        --danger-red: #e74c3c;
+    }
+
+    .report-container {
+        padding: 20px;
+        background-color: var(--bg-light);
+        min-height: 100vh;
+    }
+
+    .report-header {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+        border-left: 5px solid var(--primary-blue);
+    }
+
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    .date-section {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    .date-header {
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--bg-light);
+        margin-bottom: 15px;
+    }
+
+    .date-header h3 {
+        color: var(--dark-navy);
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .subject-card {
+        background-color: var(--bg-light);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .subject-card h5 {
+        margin: 0 0 10px 0;
+        color: var(--dark-navy);
+        font-weight: 600;
+    }
+
+    .subject-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        border: 1px solid #ecf0f1;
+    }
+
+    .stat-box .label {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-box .value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-box.present .value {
+        color: var(--success-green);
+    }
+
+    .stat-box.absent .value {
+        color: var(--danger-red);
+    }
+
+    .stat-box.percentage .value {
+        color: var(--primary-blue);
+    }
+
+    .percentage-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #ecf0f1;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+
+    .percentage-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--danger-red), var(--success-green));
+    }
+
+    .no-records {
+        text-align: center;
+        padding: 40px 20px;
+        color: #7f8c8d;
+    }
+
+    .btn-filter {
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-filter:hover {
+        background-color: #2980b9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    
+    <!-- Header -->
+    <div class="report-header">
+        <h2>My Datewise Attendance Reports</h2>
+        <p class="text-muted mb-0">
+            Track daily attendance across all your subjects and batches
+        </p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="form-inline">
+            <div class="mb-0">
+                <label for="subject_id" class="form-label me-2"><strong>Filter by Subject:</strong></label>
+                <select name="subject_id" id="subject_id" class="form-select me-2" style="width: 250px;">
+                    <option value="">All Subjects</option>
+                    {% for subject_id, subject_name in subjects %}
+                    <option value="{{ subject_id }}" {% if request.GET.subject_id|stringformat:"s" == subject_id|stringformat:"s" %}selected{% endif %}>
+                        {{ subject_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-filter">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Datewise Reports -->
+    {% if report_data %}
+        {% for date_group in report_data %}
+        <div class="date-section">
+            <div class="date-header">
+                <h3>{{ date_group.date|date:"l, d F Y" }}</h3>
+            </div>
+
+            <!-- Subject Cards -->
+            {% for subject in date_group.subjects %}
+            <div class="subject-card">
+                <h5>{{ subject.name }}</h5>
+                
+                <div class="subject-stats">
+                    <div class="stat-box">
+                        <span class="label">Total</span>
+                        <span class="value">{{ subject.total }}</span>
+                    </div>
+                    <div class="stat-box present">
+                        <span class="label">Present</span>
+                        <span class="value">{{ subject.present }}</span>
+                    </div>
+                    <div class="stat-box absent">
+                        <span class="label">Absent</span>
+                        <span class="value">{{ subject.absent }}</span>
+                    </div>
+                    <div class="stat-box percentage">
+                        <span class="label">Attendance Rate</span>
+                        <span class="value">{{ subject.percentage }}%</span>
+                    </div>
+                </div>
+
+                <!-- Percentage Bar -->
+                <div class="percentage-bar">
+                    <div class="percentage-fill" style="width: {{ subject.percentage }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            No attendance records found. Start taking attendance for your sessions!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Guardian{% endblock %}
+
+{% block content %}
+<h1>Create Guardian</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>First name</label>
+    <input type="text" name="first_name" value="" class="form-control">
+
+    <label>Last name</label>
+    <input type="text" name="last_name" value="" class="form-control">
+
+    <label>Email</label>
+    <input type="email" name="email" value="" class="form-control">
+
+    <label>Phone</label>
+    <input type="text" name="phone_number" value="" class="form-control">
+
+    <hr>
+    <label>Guardian ID</label>
+    <input type="text" name="guardian_id" value="" class="form-control">
+
+    <label>Relation</label>
+    <input type="text" name="relation_to_student" value="" class="form-control">
+
+    <label>Occupation</label>
+    <input type="text" name="occupation" value="" class="form-control">
+
+    <label>Address</label>
+    <textarea name="address" class="form-control"></textarea>
+
+    <label>Photo</label>
+    <input type="file" name="photo" class="form-control">
+
+    <br>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

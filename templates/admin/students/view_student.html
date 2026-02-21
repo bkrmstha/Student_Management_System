@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+
+{% block title %}Student: {{ student.user.get_full_name }}{% endblock %}
+
+{% block content %}
+
+<style>
+:root{
+    --primary:#5c93b8;
+    --border:#d0d0d0;
+    --bg:#f2f4f7;
+    --card:#ffffff;
+    --title:#3b6f8f;
+}
+
+.profile-container{
+    width:92%;
+    margin:30px auto;
+    font-family:"Segoe UI", Arial, sans-serif;
+}
+
+/* Header */
+.profile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.profile-header h1{
+    margin:0;
+    font-weight:600;
+    font-size:24px;
+    color:#2c3e50;
+}
+
+.buttons-container{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.edit-btn{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:8px 16px;
+    border-radius:4px;
+    cursor:pointer;
+    text-decoration:none;
+    font-size:13px;
+    transition: all 0.2s;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.edit-btn:hover{
+    background:#4a7a9c;
+    text-decoration: none;
+}
+
+.edit-btn.delete{
+    background:#e74c3c;
+}
+
+.edit-btn.delete:hover{
+    background:#c0392b;
+}
+
+.edit-btn.back{
+    background:#777;
+}
+
+.edit-btn.back:hover{
+    background:#5a5a5a;
+}
+
+/* Common Card */
+.box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+.box h2{
+    margin:0 0 10px;
+    color:var(--title);
+    font-size:16px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:5px;
+}
+
+/* Top Section */
+.top-section{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.photo-box{
+    width:180px;
+    flex-shrink:0;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px;
+    text-align:center;
+}
+
+.photo-box img{
+    width:120px;
+    height:140px;
+    border-radius:6px;
+    object-fit:cover;
+    border:1px solid var(--border);
+}
+
+.photo-box .no-photo{
+    width:120px;
+    height:140px;
+    border-radius:6px;
+    background:#f1f1f1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#aaa;
+    border:1px solid var(--border);
+    margin:0 auto;
+    font-size:36px;
+}
+
+.photo-box .student-name{
+    font-size:14px;
+    font-weight:600;
+    margin:8px 0 3px;
+    color:#2c3e50;
+}
+
+.photo-box .student-id{
+    font-size:12px;
+    color:#666;
+}
+
+.personal-info{
+    flex:1;
+}
+
+/* Compact grid layout */
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:8px;
+}
+
+.info-row{
+    display:flex;
+    align-items:center;
+    min-height:28px;
+}
+
+.info-label{
+    font-weight:600;
+    color:#555;
+    font-size:13px;
+    min-width:100px;
+    flex-shrink:0;
+}
+
+.info-value{
+    color:#2c3e50;
+    font-size:13px;
+    flex:1;
+}
+
+.info-value a{
+    color:#3498db;
+    text-decoration:none;
+}
+
+.info-value a:hover{
+    text-decoration:underline;
+}
+
+/* Emergency Contact - FIXED: Added space between label and value */
+.emergency-row{
+    grid-column:span 2;
+    padding-top:8px;
+    border-top:1px dashed #e0e0e0;
+    margin-top:4px;
+}
+
+/* Add space after "Emergency Contact:" */
+.emergency-row .info-label::after {
+    content: " ";
+    white-space: pre;
+}
+
+/* Bottom Section */
+.bottom-section{
+    display:flex;
+    gap:15px;
+}
+
+.academic,
+.guardian{
+    flex:1;
+}
+
+/* Courses List */
+.courses-list{
+    margin:5px 0 0 0;
+    padding:0;
+    list-style:none;
+}
+
+.courses-list li{
+    font-size:12px;
+    color:#2c3e50;
+    padding:3px 0;
+    border-bottom:1px dashed #eee;
+}
+
+.courses-list li:last-child{
+    border-bottom:none;
+}
+
+/* Guardian info styling */
+.guardian-info{
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid #eee;
+}
+
+.guardian-info:last-child{
+    border-bottom:none;
+    margin-bottom:0;
+    padding-bottom:0;
+}
+
+.guardian-name{
+    font-size:13px;
+    font-weight:600;
+    color:#2c3e50;
+    margin-bottom:2px;
+}
+
+.guardian-contact{
+    font-size:12px;
+    color:#555;
+    line-height:1.4;
+}
+
+.guardian-contact a{
+    color:#3498db;
+    text-decoration:none;
+}
+
+.guardian-contact a:hover{
+    text-decoration:underline;
+}
+
+/* Academic Information - FIXED: Batch on next line */
+.academic .batch-row {
+    display: block;
+    grid-column: span 2;
+}
+
+.academic .batch-row .info-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.academic .batch-row .info-value {
+    display: block;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media(max-width:900px){
+    .top-section,
+    .bottom-section{
+        flex-direction:column;
+    }
+    
+    .photo-box,
+    .personal-info,
+    .academic,
+    .guardian{
+        width:100%;
+    }
+    
+    .photo-box{
+        width:100%;
+        max-width:200px;
+        margin:0 auto;
+    }
+    
+    .profile-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+    
+    .buttons-container{
+        width:100%;
+        justify-content:flex-start;
+    }
+    
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+    
+    .emergency-row{
+        grid-column:span 1;
+    }
+    
+    .academic .batch-row {
+        grid-column: span 1;
+    }
+}
+
+@media(max-width:480px){
+    .profile-container{
+        width:95%;
+        margin:15px auto;
+    }
+    
+    .box{
+        padding:12px;
+    }
+    
+    .info-row{
+        flex-direction:column;
+        align-items:flex-start;
+        min-height:auto;
+        margin-bottom:5px;
+    }
+    
+    .info-label{
+        min-width:auto;
+        margin-bottom:2px;
+    }
+    
+    .academic .batch-row {
+        display: block;
+    }
+}
+</style>
+
+<div class="profile-container">
+
+    <!-- Header -->
+    <div class="profile-header">
+        <h1>Student Details</h1>
+        <div class="buttons-container">
+            <a href="{% url 'course_student_list' student.batch.id student.enrolled_courses.first.id %}" class="edit-btn back">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <a href="{% url 'edit_student' student.id %}" class="edit-btn">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <form method="POST" action="{% url 'delete_student' student.id %}" style="display:inline;" 
+                  onsubmit="return confirm('Are you sure you want to delete this student? This action cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="edit-btn delete">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Top Section -->
+    <div class="top-section">
+
+        <!-- Photo Box -->
+        <div class="photo-box">
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" alt="{{ student.user.get_full_name }}">
+            {% else %}
+                <div class="no-photo">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+            {% endif %}
+            <div class="student-name">{{ student.user.get_full_name }}</div>
+            <div class="student-id">ID: {{ student.student_id }}</div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="box personal-info">
+            <h2>Personal Information</h2>
+            
+            <div class="info-grid">
+                <!-- Row 1 -->
+                <div class="info-row">
+                    <span class="info-label">First Name:</span>
+                    <span class="info-value">{{ student.user.first_name }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Last Name:</span>
+                    <span class="info-value">{{ student.user.last_name }}</span>
+                </div>
+                
+                <!-- Row 2 -->
+                {% if student.middle_name %}
+                <div class="info-row">
+                    <span class="info-label">Middle Name:</span>
+                    <span class="info-value">{{ student.middle_name }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <span class="info-label">Date of Birth:</span>
+                    <span class="info-value">
+                        {% if student.date_of_birth %}
+                            {{ student.date_of_birth|date:"M d, Y" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <!-- Row 3 -->
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">
+                        <a href="mailto:{{ student.user.email }}">{{ student.user.email }}</a>
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-value">{{ student.user.phone_number|default:"-" }}</span>
+                </div>
+                
+                <!-- Row 4 -->
+                <div class="info-row">
+                    <span class="info-label">Gender:</span>
+                    <span class="info-value">{{ student.gender|default:"-" }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Nationality:</span>
+                    <span class="info-value">{{ student.nationality|default:"-" }}</span>
+                </div>
+                
+                <!-- Emergency Contact - Full Width with 1px gap -->
+                <div class="info-row emergency-row">
+                    <span class="info-label">Emergency Contact:</span>
+                    <span class="info-value">
+                        {% if father_phone or mother_phone %}
+                            {% if father_phone %}{{ father_phone }} (Father){% endif %}
+                            {% if father_phone and mother_phone %} / {% endif %}
+                            {% if mother_phone %}{{ mother_phone }} (Mother){% endif %}
+                        {% else %}
+                            Not provided
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <!-- Address - Full Width -->
+                <div class="info-row" style="grid-column: span 2;">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value">{{ student.address|default:"Not provided" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+        
+        <!-- Academic Information -->
+        <div class="box academic">
+            <h2>Academic Information</h2>
+            
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Student ID:</span>
+                    <span class="info-value">{{ student.student_id }}</span>
+                </div>
+                
+                <!-- Batch on next line -->
+                <div class="batch-row">
+                    <span class="info-label">Batch:</span>
+                    <span class="info-value">{{ student.batch.name }} ({{ student.batch.year }})</span>
+                </div>
+                
+                {% if student.grade and student.section %}
+                <div class="info-row">
+                    <span class="info-label">Grade/Section:</span>
+                    <span class="info-value">{{ student.grade }}-{{ student.section }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <span class="info-label">Enrollment Date:</span>
+                    <span class="info-value">{{ student.user.date_joined|date:"M d, Y" }}</span>
+                </div>
+                
+                <!-- Enrolled Courses - Full Width -->
+                <div class="info-row" style="grid-column: span 2;">
+                    <span class="info-label">Enrolled Courses:</span>
+                    <div class="info-value">
+                        {% if student.enrolled_courses.exists %}
+                            <ul class="courses-list">
+                                {% for c in student.enrolled_courses.all %}
+                                    <li>{{ c.name }}{% if c.short_name %} ({{ c.short_name }}){% endif %}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Information -->
+        <div class="box guardian">
+            <h2>Guardian Information</h2>
+            
+            {% if father_name or mother_name %}
+                {% if father_name %}
+                    <div class="guardian-info">
+                        <div class="guardian-name">{{ father_name }} (Father)</div>
+                        <div class="guardian-contact">
+                            {% if father_email %}
+                                Email: <a href="mailto:{{ father_email }}">{{ father_email }}</a><br>
+                            {% endif %}
+                            Phone: {{ father_phone|default:"-" }}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if mother_name %}
+                    <div class="guardian-info">
+                        <div class="guardian-name">{{ mother_name }} (Mother)</div>
+                        <div class="guardian-contact">
+                            {% if mother_email %}
+                                Email: <a href="mailto:{{ mother_email }}">{{ mother_email }}</a><br>
+                            {% endif %}
+                            Phone: {{ mother_phone|default:"-" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div style="font-size:13px; color:#777; font-style:italic;">
+                    No guardian information available
+                </div>
+            {% endif %}
+        </div>
+        
+    </div>
+
+</div>
+
+{% endblock %}

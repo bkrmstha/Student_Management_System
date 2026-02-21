@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}My Courses{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-size: 2rem; color: #2c3e50; margin: 0; }
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); text-align: center; }
+    .stat-label { color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2.5rem; color: #2c3e50; font-weight: 700; }
+    .filter-section { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.06); }
+    .filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 0.9rem; color: #2c3e50; margin-bottom: 0.5rem; font-weight: 600; }
+    .form-group input, .form-group select { padding: 0.75rem; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+    .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #ecf0f1; padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50; border-bottom: 2px solid #bdc3c7; }
+    td { padding: 1rem; border-bottom: 1px solid #ecf0f1; }
+    tr:hover { background: #f8f9fa; }
+    .badge { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    .badge-semester { background: #cfe2ff; color: #084298; }
+    .badge-yearly { background: #d1e7dd; color: #0f5132; }
+    .no-data { text-align: center; padding: 3rem; color: #7f8c8d; }
+    .btn-filter { background: #3498db; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    .btn-filter:hover { background: #2980b9; }
+    .btn-reset { background: #95a5a6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; margin-left: 0.5rem; }
+    .btn-reset:hover { background: #7f8c8d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📚 My Courses</h1>
+</div>
+
+<!-- Stats Row -->
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="stat-label">Total Courses</div>
+        <div class="stat-value">{{ total_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active</div>
+        <div class="stat-value" style="color: #27ae60;">{{ active_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Inactive</div>
+        <div class="stat-value" style="color: #e74c3c;">{{ inactive_count }}</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <h3 style="margin-top: 0; color: #2c3e50;">Search & Filter</h3>
+    <form method="GET" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="search">Search by Name or Code:</label>
+                <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="e.g., BCA, Bachelor">
+            </div>
+            <div class="form-group">
+                <label for="type">Course Type:</label>
+                <select id="type" name="type">
+                    <option value="">All Types</option>
+                    <option value="semester" {% if type_filter == 'semester' %}selected{% endif %}>Semester-based</option>
+                    <option value="yearly" {% if type_filter == 'yearly' %}selected{% endif %}>Yearly-based</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            {% if search_query or type_filter or status_filter %}
+                <button type="submit" class="btn-filter">Apply Filters</button>
+                <a href="{% url 'courses:teacher_courses' %}" class="btn-reset">Clear Filters</a>
+            {% else %}
+                <button type="submit" class="btn-filter">Apply Filters</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Courses Table -->
+{% if courses %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Short Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                    <tr>
+                        <td><strong>{{ course.name }}</strong></td>
+                        <td><code style="background: #ecf0f1; padding: 0.25rem 0.5rem; border-radius: 3px;">{{ course.short_name }}</code></td>
+                        <td><span class="badge {% if course.course_type == 'semester' %}badge-semester{% else %}badge-yearly{% endif %}">{{ course.get_course_type_display }}</span></td>
+                        <td><span class="badge {% if course.is_active %}badge-active{% else %}badge-inactive{% endif %}">{% if course.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="table-wrapper">
+        <div class="no-data">
+            <p>You haven't been assigned to any courses yet.</p>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

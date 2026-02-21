@@ -1,0 +1,230 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+    color: #2c3e50;
+}
+
+.navbar {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    flex-wrap: nowrap;
+    min-height: 60px;
+}
+
+.navbar-brand {
+    color: white;
+    font-size: 1.6rem;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-right: 1rem;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0.6rem; /* Very tight gap between menu items */
+}
+
+.nav-menu li a {
+    color: white;
+    text-decoration: none;
+    font-size: 0.92rem; /* Smaller font */
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+.nav-menu li a:hover,
+.nav-menu li a.active {
+    background-color: rgba(255,255,255,0.25);
+}
+
+.profile-dropdown {
+    position: relative;
+}
+
+.profile-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    transition: background 0.3s;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-btn:hover {
+    background-color: rgba(255,255,255,0.25);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 180px;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.profile-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 0.7rem 1rem;
+    color: #2c3e50;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown-menu a.text-danger {
+    color: #e74c3c !important;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 0.4rem 0;
+}
+
+/* Dropdown submenu styling for nav items */
+.nav-menu .dropdown {
+    position: relative;
+}
+
+.nav-menu .dropdown-submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 180px;
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    z-index: 999;
+}
+
+.nav-menu .dropdown:hover .dropdown-submenu {
+    display: block;
+}
+
+.nav-menu .dropdown-submenu li {
+    margin: 0;
+}
+
+.nav-menu .dropdown-submenu a {
+    color: #2c3e50 !important;
+    display: block;
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.nav-menu .dropdown-submenu a:hover {
+    background-color: #f0f0f0;
+    padding-left: 1.2rem;
+}
+
+main {
+    padding: 2rem;
+    min-height: calc(100vh - 70px);
+}
+
+/* Django Messages */
+.message-container {
+    margin-bottom: 1.5rem;
+}
+
+.message {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-color: #bee5eb;
+}
+
+/* Extra tight on medium screens */
+@media (max-width: 1400px) {
+    .nav-menu {
+        gap: 0.5rem;
+    }
+    .nav-menu li a {
+        font-size: 0.88rem;
+        padding: 0.35rem 0.6rem;
+    }
+}
+
+/* Only stack on tablets and below */
+@media (max-width: 992px) {
+    .navbar {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 0.8rem;
+    }
+    .nav-menu {
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+}

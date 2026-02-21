@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+
+{% block title %}Create {{ user_type|title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .create-title {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .create-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    .create-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .create-card-header {
+        background: linear-gradient(135deg, 
+            {% if user_type == 'teacher' %}#2ecc71
+            {% elif user_type == 'student' %}#9b59b6
+            {% elif user_type == 'guardian' %}#e74c3c
+            {% else %}#3498db{% endif %}, 
+            {% if user_type == 'teacher' %}#27ae60
+            {% elif user_type == 'student' %}#8e44ad
+            {% elif user_type == 'guardian' %}#c0392b
+            {% else %}#2980b9{% endif %});
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .create-card-title {
+        margin: 0;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .create-icon {
+        font-size: 2rem;
+    }
+
+    .create-card-body {
+        padding: 2rem;
+    }
+
+    .create-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3498db;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-icon {
+        font-size: 1.2rem;
+    }
+
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .field-label {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .field-label.required::after {
+        content: " *";
+        color: #e74c3c;
+    }
+
+    .field-input {
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .field-input:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+
+    .field-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    .field-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .field-help {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .field-error {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .error-input {
+        border-color: #e74c3c !important;
+    }
+
+    .error-input:focus {
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #eee;
+        justify-content: center;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, 
+            {% if user_type == 'teacher' %}#2ecc71
+            {% elif user_type == 'student' %}#9b59b6
+            {% elif user_type == 'guardian' %}#e74c3c
+            {% else %}#3498db{% endif %}, 
+            {% if user_type == 'teacher' %}#27ae60
+            {% elif user_type == 'student' %}#8e44ad
+            {% elif user_type == 'guardian' %}#c0392b
+            {% else %}#2980b9{% endif %});
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 200px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        min-width: 200px;
+    }
+
+    .cancel-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+        .create-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-header">
+    <h1 class="create-title">Create New Account</h1>
+    <p class="create-subtitle">Fill in the details below to create a new {{ user_type }} account</p>
+</div>
+
+<div class="create-card">
+    <div class="create-card-header">
+        <h2 class="create-card-title">
+            <span class="create-icon">
+                {% if user_type == 'teacher' %}👨‍🏫
+                {% elif user_type == 'student' %}🎓
+                {% elif user_type == 'guardian' %}👪
+                {% endif %}
+            </span>
+            New {{ user_type|title }} Account
+        </h2>
+    </div>
+    
+    <div class="create-card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">👤</span>
+                    Basic Information
+                </h3>
+                
+                <div class="create-form">
+                    <div class="form-row">
+                        {% for field in form %}
+                            {% if field.name in 'email,first_name,last_name,phone_number' or not '_id' in field.name %}
+                            <div class="form-field">
+                                <label for="{{ field.id_for_label }}" class="field-label {% if field.field.required %}required{% endif %}">
+                                    {{ field.label }}
+                                </label>
+                                
+                                {% if field.field.widget.input_type == 'select' %}
+                                    <select name="{{ field.name }}" 
+                                            id="{{ field.id_for_label }}" 
+                                            class="field-input field-select {% if field.errors %}error-input{% endif %}"
+                                            {% if field.field.required %}required{% endif %}>
+                                        <option value="">Select {{ field.label }}</option>
+                                        {% for value, label in field.field.choices %}
+                                            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% elif field.field.widget.input_type == 'textarea' %}
+                                    <textarea name="{{ field.name }}" 
+                                              id="{{ field.id_for_label }}" 
+                                              class="field-input field-textarea {% if field.errors %}error-input{% endif %}"
+                                              {% if field.field.required %}required{% endif %}
+                                              placeholder="Enter {{ field.label|lower }}">{{ field.value|default:'' }}</textarea>
+                                {% elif field.field.widget.input_type == 'date' %}
+                                    <input type="date" 
+                                           name="{{ field.name }}" 
+                                           id="{{ field.id_for_label }}" 
+                                           class="field-input {% if field.errors %}error-input{% endif %}"
+                                           value="{{ field.value|date:'Y-m-d' }}"
+                                           {% if field.field.required %}required{% endif %}>
+                                {% else %}
+                                    <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                           name="{{ field.name }}" 
+                                           id="{{ field.id_for_label }}" 
+                                           class="field-input {% if field.errors %}error-input{% endif %}"
+                                           value="{{ field.value|default:'' }}"
+                                           {% if field.field.required %}required{% endif %}
+                                           placeholder="Enter {{ field.label|lower }}">
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <div class="field-help">{{ field.help_text }}</div>
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                    <div class="field-error">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if user_type == 'student' or user_type == 'teacher' or user_type == 'guardian' %}
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">📝</span>
+                    Additional Details
+                </h3>
+                
+                <div class="create-form">
+                    <div class="form-row">
+                        {% for field in form %}
+                            {% if '_id' in field.name or field.name in 'department,designation,grade,section,relation_to_student,occupation,address,subjects,emergency_contact' %}
+                            <div class="form-field">
+                                <label for="{{ field.id_for_label }}" class="field-label {% if field.field.required %}required{% endif %}">
+                                    {{ field.label }}
+                                </label>
+                                
+                                {% if field.field.widget.input_type == 'select' %}
+                                    <select name="{{ field.name }}" 
+                                            id="{{ field.id_for_label }}" 
+                                            class="field-input field-select {% if field.errors %}error-input{% endif %}"
+                                            {% if field.field.required %}required{% endif %}>
+                                        <option value="">Select {{ field.label }}</option>
+                                        {% for value, label in field.field.choices %}
+                                            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% elif field.field.widget.input_type == 'textarea' %}
+                                    <textarea name="{{ field.name }}" 
+                                              id="{{ field.id_for_label }}" 
+                                              class="field-input field-textarea {% if field.errors %}error-input{% endif %}"
+                                              {% if field.field.required %}required{% endif %}
+                                              placeholder="Enter {{ field.label|lower }}">{{ field.value|default:'' }}</textarea>
+                                {% elif field.field.widget.input_type == 'date' %}
+                                    <input type="date" 
+                                           name="{{ field.name }}" 
+                                           id="{{ field.id_for_label }}" 
+                                           class="field-input {% if field.errors %}error-input{% endif %}"
+                                           value="{{ field.value|date:'Y-m-d' }}"
+                                           {% if field.field.required %}required{% endif %}>
+                                {% else %}
+                                    <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                           name="{{ field.name }}" 
+                                           id="{{ field.id_for_label }}" 
+                                           class="field-input {% if field.errors %}error-input{% endif %}"
+                                           value="{{ field.value|default:'' }}"
+                                           {% if field.field.required %}required{% endif %}
+                                           placeholder="Enter {{ field.label|lower }}">
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <div class="field-help">{{ field.help_text }}</div>
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                    <div class="field-error">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Create {{ user_type|title }}</button>
+                <a href="{% url 'admin_dashboard' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

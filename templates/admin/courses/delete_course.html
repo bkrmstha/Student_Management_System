@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Course - {{ course.code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 15px;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .warning-icon {
+        font-size: 5rem;
+        color: #e74c3c;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-title {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .delete-subtitle {
+        color: #e74c3c;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .course-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+    }
+
+    .info-item {
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .info-label {
+        color: #7f8c8d;
+        font-weight: 600;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .warning-message {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        color: #721c24;
+        text-align: left;
+    }
+
+    .warning-message h4 {
+        margin-top: 0;
+        color: #721c24;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .delete-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 150px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-delete:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-cancel {
+        background: #95a5a6;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        min-width: 150px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .subject-count {
+        background: #e74c3c;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .delete-actions {
+            flex-direction: column;
+        }
+
+        .btn-delete,
+        .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="warning-icon">⚠️</div>
+        
+        <h1 class="delete-title">Delete Course</h1>
+        <p class="delete-subtitle">This action cannot be undone!</p>
+        
+        <!-- Course Information -->
+        <div class="course-info">
+            <div class="info-item">
+                <span class="info-label">Course Code:</span>
+                <span class="info-value">{{ course.code }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Course Name:</span>
+                <span class="info-value">{{ course.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Department:</span>
+                <span class="info-value">{{ course.department|default:"-" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Subjects:</span>
+                <span class="info-value">
+                    {{ course.subjects.count }}
+                    <span class="subject-count">{{ course.subjects.count }}</span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    {% if course.is_active %}
+                    <span style="color: #2ecc71;">● Active</span>
+                    {% else %}
+                    <span style="color: #e74c3c;">● Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Warning Message -->
+        <div class="warning-message">
+            <h4><i class="fas fa-exclamation-triangle"></i> Critical Warning</h4>
+            <p>You are about to permanently delete <strong>"{{ course.name }}"</strong> and all associated data including:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>All subjects under this course ({{ course.subjects.count }})</li>
+                <li>Any student enrollments linked to this course</li>
+                <li>All related grades and records</li>
+            </ul>
+            <p style="margin-top: 1rem; font-weight: 600;">This action is irreversible. Please confirm that you want to proceed.</p>
+        </div>
+
+        <!-- Delete Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash"></i> Delete Permanently
+                </button>
+                <a href="{% url 'courses:view_course' course.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Additional confirmation on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (confirm('⚠️ FINAL WARNING: This will permanently delete "{{ course.name }}" and ALL associated data.\n\nThis includes {{ course.subjects.count }} subjects and any related records.\n\nTHIS ACTION CANNOT BE UNDONE!\n\nAre you absolutely sure you want to proceed?')) {
+            // disable submit button to prevent duplicate submissions
+            var btn = this.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Deleting...';
+            }
+            this.submit();
+        }
+    });
+</script>
+{% endblock %}

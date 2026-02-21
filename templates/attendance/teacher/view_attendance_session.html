@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Session Records - {{ session.session_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Attendance Records</h2>
+            <p class="text-muted">
+                {{ session.subject.name }} | {{ session.batch.name }} | {{ session.date }}
+            </p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-info">Total: {{ total_students }}</span>
+            <span class="badge bg-success">Present: {{ present_count }}</span>
+            <span class="badge bg-danger">Absent: {{ absent_count }}</span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Student List</h5>
+            {% if session.status != 'completed' %}
+            <a href="{% url 'attendance:take_attendance' session.id %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-edit"></i> Edit Attendance
+            </a>
+            {% endif %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td><strong>{{ record.student.student_id }}</strong></td>
+                        <td>{{ record.student.user.get_full_name }}</td>
+                        <td>
+                            {% if record.status == 'present' %}
+                                <span class="badge rounded-pill bg-success">Present</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-danger">Absent</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ record.recorded_by.get_full_name|default:"System" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">No records found for this session.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white text-end">
+            <a href="{% url 'attendance:attendance_session_list' %}" class="btn btn-outline-secondary">Back to List</a>
+            {% if session.status != 'completed' %}
+            <form action="{% url 'attendance:complete_attendance_session' session.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Mark as Completed</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

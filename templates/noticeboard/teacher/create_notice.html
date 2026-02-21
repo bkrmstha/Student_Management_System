@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Notice - Teacher{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-notice-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .notice-form {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label .required {
+        color: #e74c3c;
+    }
+
+    .form-control,
+    .form-select,
+    .form-textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+        color: #333;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 150px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #3498db;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        color: #555;
+    }
+
+    .info-box {
+        background: #ecf0f1;
+        border-left: 4px solid #3498db;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .submit-btn,
+    .cancel-btn {
+        display: inline-block;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .submit-btn {
+        background: #27ae60;
+        color: white;
+    }
+
+    .submit-btn:hover {
+        background: #229954;
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .cancel-btn:hover {
+        background: #7f8c8d;
+        text-decoration: none;
+    }
+
+    .helper-text {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-notice-container">
+    <div class="form-header">
+        <h1><i class="fas fa-bullhorn"></i> Create Notice for Your Batch</h1>
+        <p>Post a notice for your students</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="notice-form">
+        {% csrf_token %}
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                <strong>Note:</strong> This notice will be posted for your batch only. Students in this batch will receive and be able to view this notice.
+            </p>
+        </div>
+
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-pen"></i> Notice Details
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        {{ form.title.label }}
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <span class="helper-text" style="color: #e74c3c;">
+                            {{ form.title.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.content.id_for_label }}" class="form-label">
+                        {{ form.content.label }}
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.content }}
+                    <span class="helper-text">Provide clear and detailed information for your students</span>
+                    {% if form.content.errors %}
+                        <span class="helper-text" style="color: #e74c3c;">
+                            {{ form.content.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority Settings -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-flag"></i> Priority & Options
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                        {{ form.priority.label }}
+                    </label>
+                    {{ form.priority }}
+                    <span class="helper-text">Higher priority notices appear at the top</span>
+                </div>
+            </div>
+
+            <div class="checkbox-item">
+                {{ form.is_important }}
+                <label for="{{ form.is_important.id_for_label }}" class="form-check-label">
+                    <i class="fas fa-star"></i> Mark as Important
+                </label>
+                <span class="helper-text">Important notices are highlighted for students</span>
+            </div>
+        </div>
+
+        <!-- Expiration -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-calendar-times"></i> Expiration (Optional)
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.expires_at.id_for_label }}" class="form-label">
+                        {{ form.expires_at.label }}
+                    </label>
+                    {{ form.expires_at }}
+                    <span class="helper-text">Notice will become inactive after this date</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-paperclip"></i> Attachments (Optional)
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="attachments" class="form-label">Upload Files</label>
+                    <input type="file" id="attachments" name="attachments" multiple class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.txt">
+                    <span class="helper-text">Upload study materials, documents, or images (Max 10MB per file). You can upload multiple files.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <a href="{% url 'noticeboard:notice_list' %}" class="cancel-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-check"></i> Post Notice
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

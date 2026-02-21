@@ -1,0 +1,865 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ course.short_name }} - {{ course.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-detail-container {
+        max-width: 1200px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Course Information Block */
+    .course-info-block {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .course-info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .course-info-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* Titles side by side, values underneath */
+    .info-columns-container {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-column {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .info-title-row {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .info-title {
+        font-weight: 600;
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .info-values-row {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .info-value-item {
+        flex: 1;
+        min-width: 120px;
+        padding: 0.3rem 0;
+    }
+
+    .course-short-name {
+        font-family: monospace;
+        background: #3498db;
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 3px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .type-semester { background: #3498db; color: white; }
+    .type-yearly { background: #f39c12; color: white; }
+
+    .timestamp-value {
+        color: #2c3e50;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.1rem;
+    }
+
+    .timestamp-meta {
+        color: #95a5a6;
+        font-size: 0.75rem;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+    .btn-edit-course {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-edit-course:hover {
+        background: #d68910;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-add-subject {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .btn-add-subject:hover {
+        background: #27ae60;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-back {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #7f8c8d;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Period Dropdown Section */
+    .periods-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #3498db;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .section-subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+    }
+
+    /* Period Dropdown */
+    .period-dropdown {
+        margin-bottom: 0.8rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .period-header {
+        background: #f8f9fa;
+        padding: 0.9rem 1.2rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .period-header:hover {
+        background: #e9ecef;
+    }
+
+    .period-title {
+        color: #2c3e50;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .period-count {
+        background: #3498db;
+        color: white;
+        padding: 0.1rem 0.4rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.4rem;
+    }
+
+    .period-toggle {
+        font-size: 1rem;
+        color: #7f8c8d;
+        transition: transform 0.2s;
+    }
+
+    .period-body {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+    }
+
+    .period-body.active {
+        padding: 1.2rem;
+        max-height: 1500px;
+    }
+
+    .period-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.8rem;
+    }
+
+    /* Subjects Table */
+    .subjects-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .subjects-table th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        padding: 0.8rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 1px solid #3498db;
+        font-size: 0.85rem;
+    }
+
+    .subjects-table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #eee;
+        color: #2c3e50;
+        vertical-align: middle;
+    }
+
+    .subjects-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .subject-code {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .teacher-info {
+        display: block;
+    }
+
+    .teacher-name {
+        font-weight: 500;
+        color: #2c3e50;
+        font-size: 0.9rem;
+    }
+
+    .teacher-email {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin-top: 0.1rem;
+    }
+
+    .no-teacher {
+        color: #95a5a6;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    .subject-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-edit-subject,
+    .btn-delete-subject {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 1rem;
+        border: 2px solid transparent;
+    }
+
+    .btn-edit-subject {
+        background: #f39c12;
+        color: white;
+        border-color: #d68910;
+    }
+
+    .btn-edit-subject:hover {
+        background: #d68910;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-delete-subject {
+        background: #e74c3c;
+        color: white;
+        border-color: #c0392b;
+    }
+
+    .btn-delete-subject:hover {
+        background: #c0392b;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #7f8c8d;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 0.8rem;
+    }
+
+    .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .empty-desc {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 1024px) {
+        .info-title-row,
+        .info-values-row {
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .course-detail-container {
+            margin: 1rem auto;
+            padding: 0 0.8rem;
+        }
+
+        .course-info-header,
+        .section-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            width: 100%;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.6rem;
+        }
+
+        .info-title-row {
+            display: none;
+        }
+
+        .info-values-row {
+            flex-direction: column;
+            gap: 0.8rem;
+            align-items: flex-start;
+        }
+
+        .info-value-item {
+            width: 100%;
+            min-width: auto;
+        }
+
+        .info-value-item::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .subjects-table {
+            display: block;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        .subjects-table th,
+        .subjects-table td {
+            padding: 0.6rem;
+        }
+
+        .period-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.4rem;
+            padding: 0.8rem;
+        }
+
+        .period-actions {
+            align-self: stretch;
+            margin-bottom: 0.6rem;
+        }
+
+        .course-info-block,
+        .periods-section {
+            padding: 1.2rem;
+        }
+
+        .period-body.active {
+            padding: 1rem;
+        }
+        
+        .btn-edit-subject,
+        .btn-delete-subject {
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+        }
+        
+        .subject-actions {
+            gap: 0.4rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .action-btn {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .course-info-block,
+        .periods-section {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+        }
+        
+        .subjects-table th,
+        .subjects-table td {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-edit-subject,
+        .btn-delete-subject {
+            width: 34px;
+            height: 34px;
+            font-size: 0.85rem;
+        }
+        
+        .empty-state {
+            padding: 1.5rem;
+        }
+        
+        .empty-icon {
+            font-size: 2rem;
+        }
+        
+        .empty-title {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-detail-container">
+    <!-- Course Information Block -->
+    <div class="course-info-block">
+        <div class="course-info-header">
+            <h2 class="course-info-title">
+                <span>📚</span> Course Information
+            </h2>
+            <div class="action-buttons">
+                <a href="{% url 'courses:edit_course' course.id %}" class="action-btn btn-edit-course">
+                    <i class="fas fa-edit"></i> Edit Course
+                </a>
+                <a href="{% url 'courses:delete_course' course.id %}" class="action-btn btn-delete">
+                    <i class="fas fa-trash"></i> Delete Course
+                </a>
+                <a href="{% url 'courses:course_list' %}" class="action-btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Titles in one row -->
+        <div class="info-title-row">
+            <div class="info-title">Course Name</div>
+            <div class="info-title">Short Name</div>
+            <div class="info-title">Course Type</div>
+            <div class="info-title">Created</div>
+            <div class="info-title">Last Updated</div>
+        </div>
+
+        <!-- Values in one row underneath -->
+        <div class="info-values-row">
+            <div class="info-value-item" data-label="Course Name">
+                {{ course.name }}
+            </div>
+            
+            <div class="info-value-item" data-label="Short Name">
+                <span class="course-short-name">{{ course.short_name }}</span>
+            </div>
+            
+            <div class="info-value-item" data-label="Course Type">
+                <span class="type-badge type-{{ course.course_type }}">
+                    {{ course.get_course_type_display }}
+                </span>
+            </div>
+            
+            <div class="info-value-item" data-label="Created">
+                <span class="timestamp-value">{{ course.created_at|date:"F d, Y" }}</span>
+                <span class="timestamp-meta">{{ course.created_at|date:"h:i A" }}</span>
+            </div>
+            
+            <div class="info-value-item" data-label="Last Updated">
+                <span class="timestamp-value">{{ course.updated_at|date:"F d, Y" }}</span>
+                <span class="timestamp-meta">{{ course.updated_at|date:"h:i A" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects by Period (Dropdowns) -->
+    <div class="periods-section">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">
+                    <span>📖</span> Subjects by 
+                    {% if course.course_type == 'semester' %}
+                        Semester
+                    {% else %}
+                        Year
+                    {% endif %}
+                </h2>
+                <p class="section-subtitle">Total Subjects: {{ total_subjects }}</p>
+            </div>
+            <div>
+                <a href="{% url 'courses:add_course_subject' course.id %}" class="action-btn btn-add-subject">
+                    <i class="fas fa-plus-circle"></i> Add New Subject
+                </a>
+            </div>
+        </div>
+
+        {% if course.course_type == 'semester' %}
+            <!-- Semester-based Course -->
+            {% for semester_num in semester_range %}
+            <div class="period-dropdown">
+                <div class="period-header" onclick="togglePeriod('semester-{{ semester_num }}')">
+                    <h3 class="period-title">
+                        <i class="fas fa-calendar-alt"></i> Semester {{ semester_num }}
+                        {% with semester_subjects=subjects_by_semester|get_item:semester_num %}
+                        {% if semester_subjects %}
+                        <span class="period-count">{{ semester_subjects|length }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </h3>
+                    <div class="period-toggle">
+                        <i class="fas fa-chevron-down" id="toggle-semester-{{ semester_num }}"></i>
+                    </div>
+                </div>
+                
+                <div class="period-body" id="semester-{{ semester_num }}">
+                    <div class="period-actions">
+                        <a href="{% url 'courses:add_course_subject' course.id %}?semester={{ semester_num }}" class="action-btn btn-add-subject" style="font-size: 0.85rem; padding: 0.3rem 0.6rem;">
+                            <i class="fas fa-plus-circle"></i> Add Subject to Semester {{ semester_num }}
+                        </a>
+                    </div>
+                    
+                    {% with semester_subjects=subjects_by_semester|get_item:semester_num %}
+                    {% if semester_subjects %}
+                    <table class="subjects-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Subject Name</th>
+                                <th>Teacher</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in semester_subjects %}
+                            <tr>
+                                <td>
+                                    <span class="subject-code">{{ subject.code }}</span>
+                                </td>
+                                <td>{{ subject.name }}</td>
+                                <td>
+                                    {% if subject.teacher %}
+                                    <div class="teacher-info">
+                                        <span class="teacher-name">
+                                            {% if subject.teacher.teacher_profile and subject.teacher.teacher_profile.middle_name %}
+                                                {{ subject.teacher.first_name }} {{ subject.teacher.teacher_profile.middle_name }} {{ subject.teacher.last_name }}
+                                            {% else %}
+                                                {{ subject.teacher.get_full_name }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="no-teacher">
+                                        Not assigned
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="subject-actions">
+                                        <a href="{% url 'courses:edit_subject' subject.id %}" 
+                                           class="btn-edit-subject" 
+                                           title="Edit Subject">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'courses:delete_subject' subject.id %}" 
+                                           class="btn-delete-subject"
+                                           title="Delete Subject"
+                                           onclick="return confirm('Delete subject {{ subject.name }}?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📖</div>
+                        <h3 class="empty-title">No Subjects in Semester {{ semester_num }}</h3>
+                        <p class="empty-desc">No subjects have been added to this semester yet.</p>
+                        <a href="{% url 'courses:add_course_subject' course.id %}?semester={{ semester_num }}" class="action-btn btn-add-subject" style="display: inline-block;">
+                            <i class="fas fa-plus-circle"></i> Add First Subject
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+            
+        {% else %}
+            <!-- Yearly-based Course -->
+            {% for year_num in year_range %}
+            <div class="period-dropdown">
+                <div class="period-header" onclick="togglePeriod('year-{{ year_num }}')">
+                    <h3 class="period-title">
+                        <i class="fas fa-calendar"></i> Year {{ year_num }}
+                        {% with year_subjects=subjects_by_year|get_item:year_num %}
+                        {% if year_subjects %}
+                        <span class="period-count">{{ year_subjects|length }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </h3>
+                    <div class="period-toggle">
+                        <i class="fas fa-chevron-down" id="toggle-year-{{ year_num }}"></i>
+                    </div>
+                </div>
+                
+                <div class="period-body" id="year-{{ year_num }}">
+                    <div class="period-actions">
+                        <a href="{% url 'courses:add_course_subject' course.id %}?year={{ year_num }}" class="action-btn btn-add-subject" style="font-size: 0.85rem; padding: 0.3rem 0.6rem;">
+                            <i class="fas fa-plus-circle"></i> Add Subject to Year {{ year_num }}
+                        </a>
+                    </div>
+                    
+                    {% with year_subjects=subjects_by_year|get_item:year_num %}
+                    {% if year_subjects %}
+                    <table class="subjects-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Subject Name</th>
+                                <th>Teacher</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in year_subjects %}
+                            <tr>
+                                <td>
+                                    <span class="subject-code">{{ subject.code }}</span>
+                                </td>
+                                <td>{{ subject.name }}</td>
+                                <td>
+                                    {% if subject.teacher %}
+                                    <div class="teacher-info">
+                                        <span class="teacher-name">
+                                            {% if subject.teacher.teacher_profile and subject.teacher.teacher_profile.middle_name %}
+                                                {{ subject.teacher.first_name }} {{ subject.teacher.teacher_profile.middle_name }} {{ subject.teacher.last_name }}
+                                            {% else %}
+                                                {{ subject.teacher.get_full_name }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="no-teacher">
+                                        Not assigned
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="subject-actions">
+                                        <a href="{% url 'courses:edit_subject' subject.id %}" 
+                                           class="btn-edit-subject" 
+                                           title="Edit Subject">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'courses:delete_subject' subject.id %}" 
+                                           class="btn-delete-subject"
+                                           title="Delete Subject"
+                                           onclick="return confirm('Delete subject {{ subject.name }}?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📖</div>
+                        <h3 class="empty-title">No Subjects in Year {{ year_num }}</h3>
+                        <p class="empty-desc">No subjects have been added to this year yet.</p>
+                        <a href="{% url 'courses:add_course_subject' course.id %}?year={{ year_num }}" class="action-btn btn-add-subject" style="display: inline-block;">
+                            <i class="fas fa-plus-circle"></i> Add First Subject
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Toggle period dropdown
+    function togglePeriod(periodId) {
+        const periodBody = document.getElementById(periodId);
+        const toggleIcon = document.getElementById('toggle-' + periodId);
+        
+        periodBody.classList.toggle('active');
+        
+        if (periodBody.classList.contains('active')) {
+            toggleIcon.classList.remove('fa-chevron-down');
+            toggleIcon.classList.add('fa-chevron-up');
+        } else {
+            toggleIcon.classList.remove('fa-chevron-up');
+            toggleIcon.classList.add('fa-chevron-down');
+        }
+    }
+
+    // Delete confirmation for course
+    document.querySelector('.btn-delete').addEventListener('click', function(e) {
+        if (!confirm('⚠️ WARNING: This will permanently delete the course "{{ course.name }}".\n\nThis action cannot be undone.\n\nAre you absolutely sure?')) {
+            e.preventDefault();
+        }
+    });
+
+    // Initialize first period as open by default
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if course.course_type == 'semester' and semester_range %}
+            togglePeriod('semester-{{ semester_range.0 }}');
+        {% elif year_range %}
+            togglePeriod('year-{{ year_range.0 }}');
+        {% endif %}
+    });
+</script>
+{% endblock %}

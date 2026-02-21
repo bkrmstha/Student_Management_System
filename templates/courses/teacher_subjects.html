@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}My Subjects{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-size: 2rem; color: #2c3e50; margin: 0; }
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); text-align: center; }
+    .stat-label { color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2.5rem; color: #2c3e50; font-weight: 700; }
+    .filter-section { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.06); }
+    .filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 0.9rem; color: #2c3e50; margin-bottom: 0.5rem; font-weight: 600; }
+    .form-group input, .form-group select { padding: 0.75rem; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+    .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #ecf0f1; padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50; border-bottom: 2px solid #bdc3c7; }
+    td { padding: 1rem; border-bottom: 1px solid #ecf0f1; }
+    tr:hover { background: #f8f9fa; }
+    .badge { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    .badge-theory { background: #cfe2ff; color: #084298; }
+    .badge-practical { background: #d1e7dd; color: #0f5132; }
+    .no-data { text-align: center; padding: 3rem; color: #7f8c8d; }
+    .btn-filter { background: #3498db; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+    .btn-filter:hover { background: #2980b9; }
+    .btn-reset { background: #95a5a6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; margin-left: 0.5rem; }
+    .btn-reset:hover { background: #7f8c8d; }
+    .period-info { font-size: 0.85rem; color: #7f8c8d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📚 My Subjects</h1>
+</div>
+
+<!-- Stats Row -->
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="stat-label">Total Subjects</div>
+        <div class="stat-value">{{ total_count }}</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <h3 style="margin-top: 0; color: #2c3e50;">Search & Filter</h3>
+    <form method="GET" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="search">Search by Code or Name:</label>
+                <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="e.g., CS101, Database">
+            </div>
+            <div class="form-group">
+                <label for="course">Course:</label>
+                <select id="course" name="course">
+                    <option value="">All Courses</option>
+                    {% for c in courses %}
+                        <option value="{{ c.id }}" {% if course_filter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div>
+            {% if search_query or course_filter %}
+                <button type="submit" class="btn-filter">Apply Filters</button>
+                <a href="{% url 'courses:teacher_subjects' %}" class="btn-reset">Clear Filters</a>
+            {% else %}
+                <button type="submit" class="btn-filter">Apply Filters</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Subjects Table -->
+{% if subjects %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Subject Name</th>
+                    <th>Course</th>
+                    <th>Period</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                    <tr>
+                        <td><code style="background: #ecf0f1; padding: 0.25rem 0.5rem; border-radius: 3px;">{{ subject.code }}</code></td>
+                        <td><strong>{{ subject.name }}</strong></td>
+                        <td>{{ subject.course.short_name }}</td>
+                        <td>
+                            <span class="period-info">
+                                {% if subject.semester %}
+                                    Semester {{ subject.semester }}
+                                {% elif subject.year %}
+                                    Year {{ subject.year }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="table-wrapper">
+        <div class="no-data">
+            <p>You haven't been assigned to any subjects yet.</p>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

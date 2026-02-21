@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Notice Board{% endblock %}
+
+{% block extra_css %}
+<style>
+    .noticeboard-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .noticeboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .noticeboard-header h1 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .notice-count {
+        background: #e74c3c;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .create-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+
+    .create-btn:hover {
+        background: #2980b9;
+        text-decoration: none;
+    }
+
+    .notice-list {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .notice-card {
+        background: white;
+        border-left: 5px solid #3498db;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .notice-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+
+    .notice-card.important {
+        border-left-color: #e74c3c;
+        background: #fff5f5;
+    }
+
+    .notice-card.urgent {
+        border-left-color: #c0392b;
+    }
+
+    .notice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 0.5rem;
+    }
+
+    .notice-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .notice-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-priority {
+        background: #f39c12;
+        color: white;
+    }
+
+    .badge-priority.urgent {
+        background: #e74c3c;
+    }
+
+    .badge-priority.high {
+        background: #e67e22;
+    }
+
+    .badge-priority.medium {
+        background: #f39c12;
+    }
+
+    .badge-priority.low {
+        background: #95a5a6;
+    }
+
+    .badge-important {
+        background: #9b59b6;
+        color: white;
+    }
+
+    .badge-unread {
+        background: #3498db;
+        color: white;
+    }
+
+    .notice-content {
+        color: #555;
+        margin: 1rem 0;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .notice-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #ecf0f1;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .notice-meta-info {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .view-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .view-btn:hover {
+        background: #2980b9;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .noticeboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .notice-header {
+            flex-direction: column;
+        }
+
+        .notice-badges {
+            margin-top: 0.5rem;
+        }
+
+        .notice-meta {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="noticeboard-container">
+    <!-- Header -->
+    <div class="noticeboard-header">
+        <div>
+            <h1><i class="fas fa-bell"></i> Notice Board</h1>
+            {% if unread_count > 0 %}
+                <span class="notice-count">{{ unread_count }} Unread</span>
+            {% endif %}
+        </div>
+        
+        {% if user_role == 'admin' %}
+            <a href="{% url 'noticeboard:create_notice' %}" class="create-btn">
+                <i class="fas fa-plus"></i> Create Notice
+            </a>
+        {% elif user_role == 'teacher' %}
+            <a href="{% url 'noticeboard:teacher_create_notice' %}" class="create-btn">
+                <i class="fas fa-plus"></i> Create Notice
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Notice List -->
+    <div class="notice-list">
+        {% if notices %}
+            {% for notice in notices %}
+                <div class="notice-card {% if notice.is_important %}important{% endif %} {% if notice.priority == 'urgent' %}urgent{% endif %}">
+                    <div class="notice-header">
+                        <a href="{% url 'noticeboard:notice_detail' notice.id %}" style="flex: 1;">
+                            <h3 class="notice-title">{{ notice.title }}</h3>
+                        </a>
+                        <div class="notice-badges">
+                            <span class="badge badge-priority {{ notice.priority }}">
+                                {{ notice.get_priority_display }}
+                            </span>
+                            {% if notice.is_important %}
+                                <span class="badge badge-important">
+                                    <i class="fas fa-star"></i> Important
+                                </span>
+                            {% endif %}
+                            {% if notice.is_unread %}
+                                <span class="badge badge-unread">New</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="notice-content">
+                        {{ notice.content|truncatewords:30 }}
+                    </div>
+
+                    <div class="notice-meta">
+                        <div class="notice-meta-info">
+                            <span>
+                                <i class="fas fa-user"></i> {{ notice.created_by.get_full_name }}
+                            </span>
+                            <span>
+                                <i class="fas fa-calendar"></i> {{ notice.created_at|date:"M d, Y" }}
+                            </span>
+                            {% if notice.attachments.exists %}
+                                <span>
+                                    <i class="fas fa-paperclip"></i> {{ notice.attachments.count }} File(s)
+                                </span>
+                            {% endif %}
+                            {% if notice.comments.exists %}
+                                <span>
+                                    <i class="fas fa-comments"></i> {{ notice.comments.count }} Comment(s)
+                                </span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'noticeboard:notice_detail' notice.id %}" class="view-btn">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No notices available at the moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

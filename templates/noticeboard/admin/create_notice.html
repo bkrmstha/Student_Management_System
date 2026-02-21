@@ -1,0 +1,745 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Notice - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-notice-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .notice-form {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        padding-left: 0.5rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label .required {
+        color: #e74c3c;
+    }
+
+    .form-control,
+    .form-select,
+    .form-textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+        color: #333;
+        transition: border-color 0.3s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 150px;
+    }
+
+    /* Horizontal radio button styles */
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .radio-option {
+        position: relative;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: #555;
+        min-height: 44px;
+    }
+
+    .radio-label:hover {
+        border-color: #3498db;
+        background: #f8f9fa;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label {
+        border-color: #3498db;
+        background: #e3f2fd;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label::before {
+        content: "✓";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        background: #3498db;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+        font-size: 14px;
+    }
+
+    /* Audience fields container */
+    .audience-fields-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 1px solid #e9ecef;
+        display: none;
+    }
+
+    .audience-fields-container.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Checkbox group styling */
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .checkbox-item:hover {
+        border-color: #3498db;
+        background: #f8f9fa;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #3498db;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        color: #495057;
+        flex: 1;
+    }
+
+    /* Helper text */
+    .helper-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .info-message {
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 4px;
+        padding: 1rem;
+        color: #1565c0;
+        margin-top: 1rem;
+    }
+
+    /* Priority section */
+    .priority-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .important-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+
+    .important-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #ffc107;
+    }
+
+    .important-checkbox label {
+        font-weight: 500;
+        color: #2c3e50;
+        cursor: pointer;
+    }
+
+    /* Form actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .submit-btn,
+    .cancel-btn {
+        display: inline-block;
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    .submit-btn {
+        background: #27ae60;
+        color: white;
+    }
+
+    .submit-btn:hover {
+        background: #229954;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+    }
+
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+    }
+
+    .cancel-btn:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    /* Error states */
+    .error {
+        border-color: #e74c3c !important;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .radio-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-option {
+            min-width: 100%;
+        }
+
+        .checkbox-group {
+            grid-template-columns: 1fr;
+        }
+
+        .priority-group {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .notice-form {
+            padding: 1rem;
+        }
+        
+        .audience-fields-container {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-notice-container">
+    <div class="form-header">
+        <h1><i class="fas fa-bullhorn"></i> Create New Notice</h1>
+        <p>Post an important notice to your target audience</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="notice-form">
+        {% csrf_token %}
+
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-pen"></i> Basic Information
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        {{ form.title.label }}
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <span class="error-message">
+                            {{ form.title.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.content.id_for_label }}" class="form-label">
+                        {{ form.content.label }}
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                        <span class="error-message">
+                            {{ form.content.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Audience Selection -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i> Audience
+            </h2>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Audience type
+                    <span class="required">*</span>
+                </label>
+                <span class="helper-text">Select who should receive this notice</span>
+                
+                <!-- Horizontal Radio Buttons for Audience Type -->
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="audience_all" name="audience_type" value="all" checked>
+                        <label for="audience_all" class="radio-label">
+                            <i class="fas fa-users"></i> All Users
+                        </label>
+                    </div>
+                    
+                    <div class="radio-option">
+                        <input type="radio" id="audience_batch" name="audience_type" value="batch">
+                        <label for="audience_batch" class="radio-label">
+                            <i class="fas fa-layer-group"></i> Specific Batch
+                        </label>
+                    </div>
+                    
+                    <div class="radio-option">
+                        <input type="radio" id="audience_course" name="audience_type" value="course">
+                        <label for="audience_course" class="radio-label">
+                            <i class="fas fa-book"></i> Specific Course
+                        </label>
+                    </div>
+                    
+                    <div class="radio-option">
+                        <input type="radio" id="audience_individual" name="audience_type" value="individual">
+                        <label for="audience_individual" class="radio-label">
+                            <i class="fas fa-user"></i> Individual Users
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Hidden field to store the actual value -->
+                <input type="hidden" name="{{ form.audience_type.name }}" id="audience_type_value" value="all">
+                {% if form.audience_type.errors %}
+                    <span class="error-message">
+                        {{ form.audience_type.errors.0 }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- All Users Selection -->
+            <div class="audience-fields-container" id="allFields">
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i> This notice will be sent to all users in the system.
+                </div>
+            </div>
+
+            <!-- Batches Selection -->
+            <div class="audience-fields-container" id="batchFields">
+                <div class="form-group">
+                    <label for="{{ form.batches.id_for_label }}" class="form-label">
+                        {{ form.batches.label }}
+                        <span class="required">*</span>
+                    </label>
+                    <span class="helper-text">Select one or more batches</span>
+                    
+                    {% if form.batches.field.widget.input_type == 'select' %}
+                        {{ form.batches }}
+                    {% else %}
+                        <div class="checkbox-group">
+                            {% for checkbox in form.batches %}
+                                <div class="checkbox-item">
+                                    {{ checkbox.tag }}
+                                    <label for="{{ checkbox.id_for_label }}" class="form-check-label">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if form.batches.errors %}
+                        <span class="error-message">
+                            {{ form.batches.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Courses Selection -->
+            <div class="audience-fields-container" id="courseFields">
+                <div class="form-group">
+                    <label for="{{ form.courses.id_for_label }}" class="form-label">
+                        {{ form.courses.label }}
+                        <span class="required">*</span>
+                    </label>
+                    <span class="helper-text">Select one or more courses</span>
+                    
+                    {% if form.courses.field.widget.input_type == 'select' %}
+                        {{ form.courses }}
+                    {% else %}
+                        <div class="checkbox-group">
+                            {% for checkbox in form.courses %}
+                                <div class="checkbox-item">
+                                    {{ checkbox.tag }}
+                                    <label for="{{ checkbox.id_for_label }}" class="form-check-label">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if form.courses.errors %}
+                        <span class="error-message">
+                            {{ form.courses.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Individual Users Selection -->
+            <div class="audience-fields-container" id="individualFields">
+                <div class="form-group">
+                    <label for="{{ form.users.id_for_label }}" class="form-label">
+                        {{ form.users.label|default:"Select Users" }}
+                        <span class="required">*</span>
+                    </label>
+                    <span class="helper-text">Select one or more individual users</span>
+                    
+                    {% if form.users %}
+                        {% if form.users.field.widget.input_type == 'select' %}
+                            {{ form.users }}
+                        {% else %}
+                            <div class="checkbox-group">
+                                {% for checkbox in form.users %}
+                                    <div class="checkbox-item">
+                                        {{ checkbox.tag }}
+                                        <label for="{{ checkbox.id_for_label }}" class="form-check-label">
+                                            {{ checkbox.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="info-message">
+                            <i class="fas fa-exclamation-triangle"></i> User selection is not available in this form.
+                        </div>
+                    {% endif %}
+                    
+                    {% if form.users.errors %}
+                        <span class="error-message">
+                            {{ form.users.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority & Importance -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-flag"></i> Priority
+            </h2>
+
+            <div class="priority-group">
+                <div class="form-group">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                        {{ form.priority.label }}
+                    </label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                        <span class="error-message">
+                            {{ form.priority.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="important-checkbox">
+                {{ form.is_important }}
+                <label for="{{ form.is_important.id_for_label }}" class="form-check-label">
+                    <i class="fas fa-star" style="color: #ffc107;"></i> Mark as Important
+                </label>
+                {% if form.is_important.errors %}
+                    <span class="error-message">
+                        {{ form.is_important.errors.0 }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Expiration -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-calendar-times"></i> Expiration
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.expires_at.id_for_label }}" class="form-label">
+                        {{ form.expires_at.label }}
+                    </label>
+                    {{ form.expires_at }}
+                    <span class="helper-text">Notice will become inactive after this date (optional)</span>
+                    {% if form.expires_at.errors %}
+                        <span class="error-message">
+                            {{ form.expires_at.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-paperclip"></i> Attachments (Optional)
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="attachments" class="form-label">
+                        <i class="fas fa-upload"></i> Upload Files
+                    </label>
+                    <input type="file" id="attachments" name="attachments" multiple class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.txt">
+                    <span class="helper-text">Upload images, PDFs, or documents (Max 10MB per file). You can upload multiple files.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <a href="{% url 'noticeboard:notice_list' %}" class="cancel-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Create Notice
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all radio buttons
+        const audienceRadios = document.querySelectorAll('input[name="audience_type"]');
+        const audienceValueField = document.getElementById('audience_type_value');
+        
+        // Get all audience field containers
+        const allFields = document.getElementById('allFields');
+        const batchFields = document.getElementById('batchFields');
+        const courseFields = document.getElementById('courseFields');
+        const individualFields = document.getElementById('individualFields');
+        
+        // Function to toggle audience fields
+        function toggleAudienceFields(selectedValue) {
+            // Hide all fields first
+            const allContainers = [allFields, batchFields, courseFields, individualFields];
+            allContainers.forEach(container => {
+                if (container) {
+                    container.style.display = 'none';
+                    container.classList.remove('active');
+                }
+            });
+            
+            // Show the selected field
+            let selectedContainer = null;
+            switch(selectedValue) {
+                case 'all':
+                    selectedContainer = allFields;
+                    break;
+                case 'batch':
+                    selectedContainer = batchFields;
+                    break;
+                case 'course':
+                    selectedContainer = courseFields;
+                    break;
+                case 'individual':
+                    selectedContainer = individualFields;
+                    break;
+            }
+            
+            if (selectedContainer) {
+                selectedContainer.style.display = 'block';
+                selectedContainer.classList.add('active');
+                
+                // Update hidden field value
+                if (audienceValueField) {
+                    audienceValueField.value = selectedValue;
+                }
+            }
+        }
+        
+        // Add event listeners to radio buttons
+        audienceRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                toggleAudienceFields(this.value);
+            });
+        });
+        
+        // Set initial state
+        const initialValue = audienceValueField ? audienceValueField.value : 'all';
+        const initialRadio = document.querySelector(`input[name="audience_type"][value="${initialValue}"]`);
+        if (initialRadio) {
+            initialRadio.checked = true;
+        }
+        toggleAudienceFields(initialValue);
+        
+        // Also update hidden field when radios change
+        audienceRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (audienceValueField) {
+                    audienceValueField.value = this.value;
+                }
+            });
+        });
+        
+        // Add error highlighting
+        document.querySelectorAll('.errorlist').forEach(errorList => {
+            const inputField = errorList.closest('.form-group')?.querySelector('input, select, textarea');
+            if (inputField) {
+                inputField.classList.add('error');
+            }
+        });
+    });
+</script>
+{% endblock %}

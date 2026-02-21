@@ -1,0 +1,104 @@
+Noticeboard app — Step-by-step implementation guide
+
+Overview
+- Purpose: publish notices for students/staff, with categories and attachments.
+- Files: `models.py`, `forms.py`, `views.py`, `urls.py`, `admin.py`, templates.
+
+1) Models
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Notice(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    publish_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    attachment = models.FileField(upload_to='noticeboard/%Y/%m/%d/', null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+2) Forms
+
+from django import forms
+from .models import Notice
+
+class NoticeForm(forms.ModelForm):
+    class Meta:
+        model = Notice
+        fields = ('title', 'content', 'publish_date', 'is_active', 'attachment')
+
+3) Views
+- List of current notices and detail view; staff create/edit views.
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Notice
+from .forms import NoticeForm
+
+def list_notices(request):
+    notices = Notice.objects.filter(is_active=True).order_by('-publish_date', '-created_at')
+    return render(request, 'noticeboard/list.html', {'notices': notices})
+
+def notice_detail(request, pk):
+    notice = get_object_or_404(Notice, pk=pk)
+    return render(request, 'noticeboard/detail.html', {'notice': notice})
+
+def create_notice(request):
+    if request.method == 'POST':
+        form = NoticeForm(request.POST, request.FILES)
+        if form.is_valid():
+            notice = form.save(commit=False)
+            notice.created_by = request.user
+            notice.save()
+            return redirect('notice_list')
+    else:
+        form = NoticeForm()
+    return render(request, 'noticeboard/create.html', {'form': form})
+
+4) URLs
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.list_notices, name='notice_list'),
+    path('<int:pk>/', views.notice_detail, name='notice_detail'),
+    path('create/', views.create_notice, name='create_notice'),
+]
+
+5) Templates
+- `noticeboard/list.html`: loop `notices` and show title, excerpt, link to detail. Use `MEDIA_URL` for attachments.
+
+6) Admin
+- Register `Notice` with list display and date filters.
+
+7) Commands
+
+```bash
+python manage.py makemigrations noticeboard
+python manage.py migrate
+``` 
+
+8) Notes
+- Serve media files in development via `django.conf.urls.static.static` using `MEDIA_ROOT`/`MEDIA_URL`.
+- Add permission checks to creation view (e.g., `@user_passes_test(lambda u: u.is_staff)`).
+ 
+Project-specific models (from this repository)
+
+- `Notice`:
+    - Fields: `title`, `content`, `audience_type` (all/batch/course/role/etc.), M2M `batches`, M2M `courses`, `priority`, `is_important`, `created_by`, `created_at`, `expires_at`, `is_active`.
+    - Helpers: `get_viewer_count()`, `is_expired()`.
+
+- `NoticeAttachment`:
+    - Fields: `notice` FK and `file` (uploaded to `noticeboard/%Y/%m/%d/`).
+
+- `NoticeComment`, `NoticeView`, `NoticeReadStatus`:
+    - `NoticeComment` stores comments per user; `NoticeView` tracks who viewed a notice (unique per notice+user); `NoticeReadStatus` stores read/unread state per user.
+
+Notes specific to this codebase
+- Use `NoticeView`/`NoticeReadStatus` to build unread counters for dashboards.
+- Attachments are stored under `MEDIA_ROOT/noticeboard/...`; ensure `MEDIA_URL` is configured in templates.
+

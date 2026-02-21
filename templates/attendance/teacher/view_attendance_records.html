@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Records - {{ session.session_id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+    .header { background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .header h1 { color: #2c3e50; margin: 0; font-size: 1.8rem; }
+    .header-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .info-item { background: #f8f9fa; padding: 1rem; border-radius: 8px; }
+    .info-label { color: #7f8c8d; font-size: 0.85rem; }
+    .info-value { font-weight: 600; color: #2c3e50; margin-top: 0.3rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .stat { text-align: center; }
+    .stat-number { font-size: 1.8rem; font-weight: bold; }
+    .stat-present { color: #27ae60; }
+    .stat-absent { color: #e74c3c; }
+    .stat-excused { color: #3498db; }
+    .stat-half { color: #9b59b6; }
+    .stat-label { color: #7f8c8d; font-size: 0.85rem; margin-top: 0.3rem; }
+    .records-section { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .records-table { width: 100%; border-collapse: collapse; }
+    .records-table th { background: #34495e; color: white; padding: 1rem; text-align: left; font-weight: 600; }
+    .records-table td { padding: 1rem; border-bottom: 1px solid #ecf0f1; }
+    .records-table tbody tr:hover { background: #f8f9fa; }
+    .student-id { font-family: monospace; background: #f0f0f0; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .status-badge { display: inline-block; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .status-present { background: #d4edda; color: #155724; }
+    .status-absent { background: #f8d7da; color: #721c24; }
+    .status-excused { background: #d1ecf1; color: #0c5460; }
+    .status-half_day { background: #e2e3e5; color: #383d41; }
+    .back-btn { display: inline-block; margin-bottom: 2rem; padding: 0.6rem 1.2rem; background: #95a5a6; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }
+    .back-btn:hover { background: #7f8c8d; }
+    @media (max-width: 768px) {
+        .header-info, .stats { grid-template-columns: repeat(2, 1fr); }
+        .records-table { font-size: 0.9rem; }
+        .records-table th, .records-table td { padding: 0.7rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'attendance:teacher_attendance' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+
+    <!-- Header -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h1><i class="fas fa-chart-bar"></i> Attendance Records</h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'attendance:datewise_attendance_report' session.id %}" style="display: inline-block; padding: 0.7rem 1.2rem; background: #27ae60; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: 0.3s;">
+                    <i class="fas fa-calendar-check"></i> Full Report
+                </a>
+                <a href="{% url 'attendance:subject_attendance_report' session.subject.id %}" style="display: inline-block; padding: 0.7rem 1.2rem; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: 0.3s;">
+                    <i class="fas fa-chart-line"></i> Subject Report
+                </a>
+            </div>
+        </div>
+        
+        <div class="header-info">
+            <div class="info-item">
+                <div class="info-label">Session ID</div>
+                <div class="info-value">{{ session.session_id }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Batch</div>
+                <div class="info-value">{{ session.batch.name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Subject</div>
+                <div class="info-value">{{ session.subject.code }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date</div>
+                <div class="info-value">{{ session.date|date:"M d, Y" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                    {% if session.status == 'completed' %}
+                        <span style="color: #27ae60; font-weight: bold;">Completed</span>
+                    {% elif session.status == 'ongoing' %}
+                        <span style="color: #3498db; font-weight: bold;">Ongoing</span>
+                    {% elif session.status == 'scheduled' %}
+                        <span style="color: #f39c12; font-weight: bold;">Scheduled</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number stat-present">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number stat-present">{{ present_count }}</div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number stat-absent">{{ absent_count }}</div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <!-- Late stat removed -->
+            <div class="stat">
+                <div class="stat-number stat-excused">{{ excused_count }}</div>
+                <div class="stat-label">Excused</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number stat-half">{{ half_day_count }}</div>
+                <div class="stat-label">Half Day</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Records Table -->
+    <div class="records-section">
+        <h2 style="color: #2c3e50; margin-top: 0;">Student Attendance Details</h2>
+        
+        {% if records %}
+            <div style="overflow-x: auto;">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                            <th>Recorded By</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                            <tr>
+                                <td>
+                                    <span class="student-id">{{ record.student.student_id }}</span>
+                                </td>
+                                <td>{{ record.student.user.get_full_name }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ record.status }}">
+                                        {{ record.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if record.recorded_by %}
+                                        {{ record.recorded_by.get_full_name }}
+                                    {% else %}
+                                        <span style="color: #7f8c8d;">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ record.updated_at|date:"M d, Y H:i" }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #7f8c8d; padding: 2rem;">No attendance records found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

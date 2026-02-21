@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Today's Absent Students{% endblock %}
+
+{% block extra_css %}
+<style>
+    .absent-list-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .absent-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 3px solid #dc3545;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .date-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .absent-count-badge {
+        background: #ffc107;
+        color: #333;
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-left: 1rem;
+    }
+
+    .back-btn {
+        background: #3498db;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: 2px solid #2980b9;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .batch-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .batch-header {
+        background: #34495e;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .batch-header i {
+        font-size: 1.3rem;
+    }
+
+    .course-section {
+        background: #ecf0f1;
+        border-left: 4px solid #3498db;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .course-header {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-header .course-name {
+        color: #2980b9;
+    }
+
+    .student-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .student-list li {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid #d5dbdb;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .student-list li:last-child {
+        border-bottom: none;
+    }
+
+    .student-list i {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+    .student-id {
+        background: #fff3cd;
+        color: #856404;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: auto;
+    }
+
+    .no-absent-today {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+
+    .no-absent-today i {
+        font-size: 3rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .no-absent-today h3 {
+        color: #2c3e50;
+        font-size: 1.3rem;
+    }
+
+    .header-action {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .header-action {
+            width: 100%;
+        }
+
+        .date-badge,
+        .absent-count-badge {
+            font-size: 0.9rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="absent-list-container">
+    <a href="{% url 'student_list' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to All Students
+    </a>
+
+    <div class="absent-section">
+        <div class="section-header">
+            <h2><i class="fas fa-calendar-times"></i> Today's Absent Students</h2>
+            <div class="header-action">
+                <span class="date-badge">
+                    <i class="fas fa-calendar-alt"></i> {{ today|date:"d M, Y" }}
+                </span>
+                {% if absent_count > 0 %}
+                    <span class="absent-count-badge">{{ absent_count }} Absent</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if absent_by_batch_course %}
+            {% for batch_key, batch_data in absent_by_batch_course.items %}
+                <div class="batch-section">
+                    <div class="batch-header">
+                        <i class="fas fa-layer-group"></i>
+                        {{ batch_data.batch.name }}
+                    </div>
+
+                    {% for course_key, course_data in batch_data.courses.items %}
+                        <div class="course-section">
+                            {% if course_data.course %}
+                                <div class="course-header">
+                                    <span>📚</span>
+                                    <span class="course-name">{{ course_data.course.name }}</span>
+                                    <span style="color: #7f8c8d; font-weight: normal;">({{ course_data.course.short_name }})</span>
+                                </div>
+                            {% else %}
+                                <div class="course-header">
+                                    <span>📚</span>
+                                    <span class="course-name">Unassigned Course</span>
+                                </div>
+                            {% endif %}
+
+                            <ul class="student-list">
+                                {% for student in course_data.students %}
+                                    <li>
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>{{ student.user.get_full_name }}</span>
+                                        <span class="student-id">{{ student.student_id }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-absent-today">
+                <i class="fas fa-check-circle"></i>
+                <h3>No Absent Students Today</h3>
+                <p>All students are present or no attendance records have been marked yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

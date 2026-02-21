@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Notice{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-notice-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #f39c12;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+
+    .notice-form {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+        padding-left: 0.5rem;
+        border-left: 3px solid #f39c12;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #e74c3c;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 200px;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #f39c12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+    }
+
+    /* Style all form fields in this form */
+    .notice-form input[type="text"],
+    .notice-form input[type="datetime-local"],
+    .notice-form input[type="file"],
+    .notice-form textarea,
+    .notice-form select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .notice-form textarea {
+        resize: vertical;
+        min-height: 200px;
+    }
+
+    .notice-form input[type="text"]:focus,
+    .notice-form input[type="datetime-local"]:focus,
+    .notice-form input[type="file"]:focus,
+    .notice-form textarea:focus,
+    .notice-form select:focus {
+        outline: none;
+        border-color: #f39c12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+    }
+
+    /* Style checkbox inputs */
+    .notice-form input[type="checkbox"] {
+        width: auto;
+        margin-right: 0.5rem;
+    }
+
+    /* CheckboxSelectMultiple styling */
+    .notice-form ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .notice-form li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .notice-form input[type="checkbox"] + label {
+        margin: 0;
+        font-weight: normal;
+    }
+
+    .form-help {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        font-style: italic;
+    }
+
+    .form-error {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+    }
+
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .two-column {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .attachment-list {
+        background: #f8f9fa;
+        border: 1px solid #ecf0f1;
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .attachment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .attachment-item:last-child {
+        border-bottom: none;
+    }
+
+    .attachment-delete {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .attachment-delete:hover {
+        background: #c0392b;
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #ecf0f1;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-submit {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background: #e67e22;
+    }
+
+    .btn-cancel {
+        background: #ecf0f1;
+        color: #7f8c8d;
+    }
+
+    .btn-cancel:hover {
+        background: #bdc3c7;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-notice-container">
+    <div class="form-header">
+        <h1>✏️ Edit Notice</h1>
+        <p>Update the notice information</p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="notice-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <div class="section-title">Notice Details</div>
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}" class="form-label required">Title</label>
+                {% if form.title.errors %}
+                    {{ form.title }}
+                    <div class="form-error">{{ form.title.errors.0 }}</div>
+                {% else %}
+                    {{ form.title }}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.content.id_for_label }}" class="form-label required">Content</label>
+                {% if form.content.errors %}
+                    {{ form.content }}
+                    <div class="form-error">{{ form.content.errors.0 }}</div>
+                {% else %}
+                    {{ form.content }}
+                {% endif %}
+            </div>
+
+            <div class="two-column">
+                <div class="form-group">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+                    {% if form.priority.errors %}
+                        {{ form.priority }}
+                        <div class="form-error">{{ form.priority.errors.0 }}</div>
+                    {% else %}
+                        {{ form.priority }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.expires_at.id_for_label }}" class="form-label">Expires At</label>
+                    {% if form.expires_at.errors %}
+                        {{ form.expires_at }}
+                        <div class="form-error">{{ form.expires_at.errors.0 }}</div>
+                    {% else %}
+                        {{ form.expires_at }}
+                    {% endif %}
+                    <p class="form-help">Leave blank for no expiration</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    {{ form.is_important }}
+                    <label for="{{ form.is_important.id_for_label }}" class="form-label" style="margin: 0;">Mark as Important</label>
+                </div>
+                {% if form.is_important.errors %}
+                    <div class="form-error">{{ form.is_important.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Audience</div>
+
+            <div class="form-group">
+                <label for="{{ form.audience_type.id_for_label }}" class="form-label required">Audience Type</label>
+                {% if form.audience_type.errors %}
+                    {{ form.audience_type }}
+                    <div class="form-error">{{ form.audience_type.errors.0 }}</div>
+                {% else %}
+                    {{ form.audience_type }}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.batches.id_for_label }}" class="form-label">Batches</label>
+                {% if form.batches.errors %}
+                    {{ form.batches }}
+                    <div class="form-error">{{ form.batches.errors.0 }}</div>
+                {% else %}
+                    {{ form.batches }}
+                {% endif %}
+                <p class="form-help">Select if audience type is "Specific Batch"</p>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.courses.id_for_label }}" class="form-label">Courses</label>
+                {% if form.courses.errors %}
+                    {{ form.courses }}
+                    <div class="form-error">{{ form.courses.errors.0 }}</div>
+                {% else %}
+                    {{ form.courses }}
+                {% endif %}
+                <p class="form-help">Select if audience type is "Specific Course"</p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Attachments</div>
+
+            {% if attachments %}
+                <div class="attachment-list">
+                    <p style="margin: 0 0 1rem 0; color: #7f8c8d; font-weight: 600;">Current Attachments:</p>
+                    {% for attachment in attachments %}
+                        <div class="attachment-item">
+                            <a href="{{ attachment.file.url }}" target="_blank">
+                                📎 {{ attachment.file.name }}
+                            </a>
+                            <a href="{% url 'noticeboard:delete_attachment' attachment.id %}" 
+                               class="attachment-delete" 
+                               onclick="return confirm('Delete this attachment?');">
+                                Delete
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_attachments" class="form-label">Add New Attachments</label>
+                <input type="file" id="id_attachments" name="attachments" multiple class="form-input">
+                <p class="form-help">Select files to attach to this notice</p>
+            </div>
+        </div>
+
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-submit">Update Notice</button>
+            <a href="{% url 'noticeboard:notice_detail' notice.id %}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

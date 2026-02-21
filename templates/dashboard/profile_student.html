@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Profile{% endblock %}
+
+{% block content %}
+
+<style>
+:root{
+    --primary:#5c93b8;
+    --border:#d0d0d0;
+    --bg:#f2f4f7;
+    --card:#ffffff;
+    --title:#3b6f8f;
+}
+
+.profile-container{
+    width:92%;
+    margin:30px auto;
+    font-family:"Segoe UI", Arial, sans-serif;
+}
+
+/* Header */
+.profile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.profile-header h1{
+    margin:0;
+    font-weight:600;
+}
+
+.edit-btn{
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:10px 22px;
+    border-radius:25px;
+    cursor:pointer;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.edit-btn.back{
+    background:#777;
+    margin-left:10px;
+}
+
+/* Common Card */
+.box{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+    box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+
+.box h2{
+    margin:0 0 12px;
+    color:var(--title);
+    font-size:18px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:6px;
+}
+
+.box p{
+    margin:8px 0;
+    font-size:14.5px;
+}
+
+/* Top Section */
+.top-section{
+    display:flex;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.photo-box{
+    width:230px;
+    flex-shrink:0;
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+
+.photo-box img{
+    width:150px;
+    height:180px;
+    border-radius:8px;
+    object-fit:cover;
+    border:1.5px solid var(--border);
+}
+
+.personal-info{
+    flex:1;
+}
+
+/* Bottom Section */
+.bottom-section{
+    display:flex;
+    gap:20px;
+    align-items:stretch;
+}
+
+.academic,
+.guardian{
+    width:50%;
+}
+
+/* Responsive */
+@media(max-width:900px){
+    .top-section,
+    .bottom-section{
+        flex-direction:column;
+    }
+    .photo-box,
+    .academic,
+    .guardian{
+        width:100%;
+    }
+}
+</style>
+
+<div class="profile-container">
+
+    <!-- Header -->
+    <div class="profile-header">
+        <h1>Student Profile</h1>
+        <div>
+            <a href="#" class="edit-btn">Edit Profile</a>
+            <a href="{% url 'student_dashboard' %}" class="edit-btn back">Back</a>
+        </div>
+    </div>
+
+    <!-- Top Section -->
+    <div class="top-section">
+
+        <div class="photo-box">
+            {% if profile.photo %}
+                <img src="{{ profile.photo.url }}">
+            {% else %}
+                <img src="https://via.placeholder.com/150x180">
+            {% endif %}
+            <p>{{ user.get_full_name }}</p>
+            <p style="font-size:13px;color:#666;">ID: {{ profile.student_id }}</p>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="box personal-info">
+            <h2>Personal Information</h2>
+
+            <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+            {% if profile.middle_name %}
+                <p><strong>Middle Name:</strong> {{ profile.middle_name }}</p>
+            {% endif %}
+
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Phone:</strong> {{ user.phone_number|default:"-" }}</p>
+
+            <p><strong>Date of Birth:</strong>
+                {% if profile.date_of_birth %}
+                    {{ profile.date_of_birth|date:"M d, Y" }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+
+            <p><strong>Gender:</strong> {{ profile.gender|default:"-" }}</p>
+            <p><strong>Nationality:</strong> {{ profile.nationality|default:"Nepali" }}</p>
+
+            <!-- Address -->
+            <p><strong>Address:</strong> {{ profile.address|default:"Not provided" }}</p>
+
+            <!-- Emergency Contact -->
+            <p><strong>Emergency Contact:</strong>
+                {% comment %}Father contact{% endcomment %}
+                {% if father_guardian %}
+                    {{ father_guardian.phone_number|default:"-" }} (Father)
+                {% else %}
+                    - (Father)
+                {% endif %}
+
+                / 
+
+                {% comment %}Mother contact{% endcomment %}
+                {% if mother_guardian %}
+                    {{ mother_guardian.phone_number|default:"-" }} (Mother)
+                {% else %}
+                    - (Mother)
+                {% endif %}
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+
+        <!-- Academic Information -->
+        <div class="box academic">
+            <h2>Academic Information</h2>
+
+            <p><strong>Student ID:</strong> {{ profile.student_id }}</p>
+            <p><strong>Batch:</strong> {{ profile.batch.name }}</p>
+
+            <p><strong>Enrolled Courses:</strong></p>
+            {% if profile.enrolled_courses.exists %}
+                <ul style="margin:6px 0 0 18px;padding:0;">
+                    {% for c in profile.enrolled_courses.all %}
+                        <li>{{ c.name }}{% if c.short_name %} ({{ c.short_name }}){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Not assigned</p>
+            {% endif %}
+        </div>
+
+        <!-- Guardian Information -->
+        <div class="box guardian">
+            <h2>Guardian Information</h2>
+
+            {% with rels=user.guardians.all %}
+                {% if rels.exists %}
+                    <ul style="margin:6px 0 0 18px;padding:0;">
+                    {% for rel in rels %}
+                        <li style="margin-bottom:10px;">
+                            <strong>{{ rel.guardian.get_full_name }}</strong>
+                            {% if rel.is_primary %}
+                                <span style="color:#2c3e50;font-weight:600;"> (Primary)</span>
+                            {% endif %}
+                            <div style="font-size:13px;color:#555;">
+                                Email: {{ rel.guardian.email|default:"-" }} |
+                                Phone: {{ rel.guardian.phone_number|default:"-" }}
+                            </div>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No guardians linked yet.</p>
+                {% endif %}
+            {% endwith %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

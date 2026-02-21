@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}Guardian Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+
+/* ===== Page Background ===== */
+body {
+    background: #f4f7fb;
+}
+
+/* ===== Container ===== */
+.dashboard-container {
+    max-width: 1300px;
+    margin: auto;
+}
+
+/* ===== Hero Header ===== */
+.hero {
+    padding: 2.2rem;
+    border-radius: 18px;
+    margin-bottom: 2rem;
+    color: white;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.hero h1 { margin: 0; font-size: 2rem; font-weight: 700; }
+.hero p { margin-top: 0.4rem; opacity: 0.9; }
+
+/* ===== Horizontal Stats ===== */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6rem;
+    margin-bottom: 1.8rem;
+}
+
+@media(max-width: 992px) {
+    .stats { grid-template-columns: 1fr; }
+}
+
+.stat {
+    padding: 1.8rem;
+    border-radius: 16px;
+    position: relative;
+    color: white;
+    transition: 0.25s;
+}
+
+.stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.stat a {
+    text-decoration: none;
+    color: white;
+    display: block;
+}
+
+.stat-title {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.stat-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-top: 0.3rem;
+}
+
+.stat-icon {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2.4rem;
+    opacity: 0.25;
+}
+
+/* stat colors */
+.stat-blue { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+.stat-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.stat-green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+
+/* ===== Bottom Layout ===== */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.6rem;
+}
+
+@media(max-width: 992px) {
+    .bottom-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== Cards ===== */
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 1.8rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+.section-title {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* ===== Notice ===== */
+.notice-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.notice-text {
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* ===== Quick Actions ===== */
+.action {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    transition: 0.2s;
+    text-decoration: none;
+    color: #1f2937;
+}
+
+.action:hover {
+    background: #f1f5f9;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+
+    <!-- HEADER -->
+    <div class="hero">
+        <h1>Welcome, {{ request.user.first_name|default:"Guardian" }} 👋</h1>
+        <p>Monitor your child's academic progress</p>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats">
+
+        <div class="stat stat-blue">
+            <a href="{% url 'courses:student_courses' %}">
+                <div class="stat-title">Child's Courses</div>
+                <div class="stat-value">{{ courses_count|default:0 }}</div>
+                <div class="stat-icon">📚</div>
+            </a>
+        </div>
+
+        <div class="stat stat-purple">
+            <a href="{% url 'profile' %}">
+                <div class="stat-title">Student ID</div>
+                <div class="stat-value">{{ student_profile.student_id|default:'--' }}</div>
+                <div class="stat-icon">🆔</div>
+            </a>
+        </div>
+
+        <div class="stat stat-green">
+            <a href="{% url 'attendance:student_attendance_records' %}">
+                <div class="stat-title">Attendance</div>
+                <div class="stat-value">--</div>
+                <div class="stat-icon">📊</div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- NOTICE LEFT + ACTIONS RIGHT -->
+    <div class="bottom-grid">
+
+        <!-- LEFT → NOTICE -->
+        <div class="card">
+            <div class="section-title">📢 School Notices</div>
+
+            {% if latest_notice %}
+                <div class="notice-title">{{ latest_notice.title }}</div>
+                <div class="notice-text">{{ latest_notice.content|truncatechars:300 }}</div>
+                <a href="{% url 'noticeboard:notice_detail' latest_notice.id %}">
+                    Read full notice →
+                </a>
+            {% else %}
+                <div class="notice-text">No active notices available.</div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT → QUICK ACTIONS -->
+        <div class="card">
+            <div class="section-title">⚡ Quick Actions</div>
+
+            <a class="action" href="{% url 'attendance:student_attendance_records' %}">
+                📊 View Attendance
+            </a>
+
+            <a class="action" href="{% url 'courses:student_courses' %}">
+                📚 View Courses
+            </a>
+
+            <a class="action" href="{% url 'profile' %}">
+                👤 Student Profile
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

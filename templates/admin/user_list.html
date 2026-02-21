@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .users-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .users-title {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .users-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .filter-label {
+        color: #2c3e50;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .filter-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .users-table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .users-table th {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 1.2rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .users-table th:first-child {
+        border-top-left-radius: 15px;
+    }
+
+    .users-table th:last-child {
+        border-top-right-radius: 15px;
+    }
+
+    .users-table td {
+        padding: 1.2rem 1rem;
+        border-bottom: 1px solid #eee;
+        color: #2c3e50;
+    }
+
+    .users-table tbody tr {
+        transition: background 0.3s;
+    }
+
+    .users-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-email {
+        font-weight: 500;
+        color: #3498db;
+    }
+
+    .user-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-admin { background: #3498db; color: white; }
+    .role-teacher { background: #2ecc71; color: white; }
+    .role-student { background: #9b59b6; color: white; }
+    .role-guardian { background: #e74c3c; color: white; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-active { 
+        background: #d4edda; 
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-inactive { 
+        background: #f8d7da; 
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .empty-desc {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Action buttons styling */
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+    
+    .action-btn {
+        padding: 0.4rem 0.7rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+    
+    .btn-view {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-view:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(41, 128, 185, 0.3);
+    }
+    
+    .btn-edit {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: #d68910;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(243, 156, 18, 0.3);
+    }
+    
+    .btn-reset {
+        background: #9b59b6;
+        color: white;
+    }
+    
+    .btn-reset:hover {
+        background: #8e44ad;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(155, 89, 182, 0.3);
+    }
+    
+    .btn-toggle {
+        background: #2ecc71;
+        color: white;
+    }
+    
+    .btn-toggle.inactive {
+        background: #e74c3c;
+    }
+    
+    .btn-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Quick stats */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-title {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        color: #2c3e50;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .stat-teachers { border-top: 4px solid #2ecc71; }
+    .stat-students { border-top: 4px solid #9b59b6; }
+    .stat-guardians { border-top: 4px solid #e74c3c; }
+    .stat-total { border-top: 4px solid #3498db; }
+
+    /* Search box */
+    .search-box {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .search-btn {
+        background: #3498db;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .search-btn:hover {
+        background: #2980b9;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .users-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filters {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-select {
+            width: 100%;
+        }
+        
+        .users-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .search-box {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 0.8rem 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn span {
+            display: none; /* Hide text on very small screens */
+        }
+        
+        .action-btn {
+            padding: 0.6rem;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="users-header">
+    <div>
+        <h1 class="users-title">User Management</h1>
+        <p class="users-subtitle">Manage all user accounts in the system</p>
+    </div>
+    
+    <div class="filters">
+        <label for="role-filter" class="filter-label">Filter by Role:</label>
+        <select id="role-filter" class="filter-select" onchange="filterByRole(this.value)">
+            <option value="">All Users</option>
+            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
+            <option value="teacher" {% if role_filter == 'teacher' %}selected{% endif %}>Teachers</option>
+            <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+            <option value="guardian" {% if role_filter == 'guardian' %}selected{% endif %}>Guardians</option>
+        </select>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card stat-total">
+        <div class="stat-title">Total Users</div>
+        <div class="stat-value">{{ total_count }}</div>
+    </div>
+    <div class="stat-card stat-teachers">
+        <div class="stat-title">Teachers</div>
+        <div class="stat-value">{{ teacher_count }}</div>
+    </div>
+    <div class="stat-card stat-students">
+        <div class="stat-title">Students</div>
+        <div class="stat-value">{{ student_count }}</div>
+    </div>
+    <div class="stat-card stat-guardians">
+        <div class="stat-title">Guardians</div>
+        <div class="stat-value">{{ guardian_count }}</div>
+    </div>
+</div>
+
+<!-- Search Box -->
+<form method="get" action="{% url 'user_list' %}" class="search-box">
+    <input type="text" 
+           name="search" 
+           placeholder="Search by name, email, or phone..." 
+           class="search-input"
+           value="{{ search_query|default:'' }}">
+    <button type="submit" class="search-btn">Search</button>
+    {% if search_query %}
+    <a href="{% url 'user_list' %}" class="search-btn" style="background: #95a5a6;">Clear</a>
+    {% endif %}
+</form>
+
+<div class="users-table-container">
+    {% if users %}
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <strong>#{{ user.id }}</strong>
+                </td>
+                <td>
+                    <div class="user-name">{{ user.first_name }} {{ user.last_name }}</div>
+                </td>
+                <td>
+                    <div class="user-email">{{ user.email }}</div>
+                </td>
+                <td>
+                    <span class="role-badge role-{{ user.role }}">
+                        {{ user.get_role_display }}
+                    </span>
+                </td>
+                <td>{{ user.phone_number|default:"-" }}</td>
+                <td>
+                    <span class="status-badge status-{% if user.is_active %}active{% else %}inactive{% endif %}">
+                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>{{ user.date_created|date:"M d, Y" }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <!-- View Button -->
+                        <a href="{% url 'user_detail' user.id %}" 
+                           class="action-btn btn-view" 
+                           title="View Details">
+                            👁️ <span>View</span>
+                        </a>
+                        
+                        <!-- Edit Button -->
+                        {% if user.role == 'teacher' %}
+                            <a href="{% url 'edit_teacher' user.id %}" 
+                               class="action-btn btn-edit" 
+                               title="Edit Teacher">
+                                ✏️ <span>Edit</span>
+                            </a>
+                        {% elif user.role == 'student' %}
+                            <a href="{% url 'edit_student' user.id %}" 
+                               class="action-btn btn-edit" 
+                               title="Edit Student">
+                                ✏️ <span>Edit</span>
+                            </a>
+                        {% elif user.role == 'guardian' %}
+                            <a href="{% url 'edit_guardian' user.id %}" 
+                               class="action-btn btn-edit" 
+                               title="Edit Guardian">
+                                ✏️ <span>Edit</span>
+                            </a>
+                        {% endif %}
+                        
+                        <!-- Reset Password Button -->
+                        <a href="{% url 'reset_user_password' user.id %}" 
+                           class="action-btn btn-reset" 
+                           title="Reset Password"
+                           onclick="return confirm('Reset password for {{ user.email }}? New password will be sent via email.')">
+                            🔑 <span>Reset</span>
+                        </a>
+                        
+                        <!-- Toggle Status Button -->
+                        <a href="{% url 'toggle_user_status' user.id %}" 
+                           class="action-btn btn-toggle {% if not user.is_active %}inactive{% endif %}"
+                           onclick="return confirm('{% if user.is_active %}Deactivate{% else %}Activate{% endif %} {{ user.email }}?')">
+                            {% if user.is_active %}
+                                ⛔ <span>Deactivate</span>
+                            {% else %}
+                                ✅ <span>Activate</span>
+                            {% endif %}
+                        </a>
+                        
+                        <!-- Delete Button -->
+                        <a href="{% url 'delete_user' user.id %}" 
+                           class="action-btn btn-delete"
+                           onclick="return confirm('⚠️ WARNING: This will permanently delete {{ user.email }} and all associated data. This action cannot be undone.\\n\\nAre you absolutely sure?')"
+                           title="Delete User">
+                            🗑️ <span>Delete</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h2 class="empty-title">No Users Found</h2>
+        <p class="empty-desc">
+            {% if search_query %}
+                No users match your search "{{ search_query }}".
+            {% elif role_filter %}
+                No {{ role_filter }}s found.
+            {% else %}
+                No users in the system yet.
+            {% endif %}
+        </p>
+        <a href="{% url 'user_list' %}" class="action-btn btn-view" style="display: inline-block; padding: 0.75rem 1.5rem;">
+            Clear Filters
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function filterByRole(role) {
+        let url = new URL(window.location.href);
+        if (role) {
+            url.searchParams.set('role', role);
+        } else {
+            url.searchParams.delete('role');
+        }
+        // Keep search query if exists
+        const search = new URLSearchParams(window.location.search).get('search');
+        if (search) {
+            url.searchParams.set('search', search);
+        }
+        window.location.href = url.toString();
+    }
+
+    // Auto-submit search on Enter key
+    document.querySelector('.search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            this.form.submit();
+        }
+    });
+
+    // Show confirmation for delete with more details
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('⚠️ WARNING: This will permanently delete this user and all associated data.\n\nThis action cannot be undone.\n\nAre you absolutely sure?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

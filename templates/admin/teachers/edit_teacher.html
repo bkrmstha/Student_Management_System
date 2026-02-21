@@ -1,0 +1,724 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Teacher - {{ teacher.email }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 1000px;
+        margin: 1.5rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .edit-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid #f39c12;
+    }
+
+    .edit-title {
+        color: #2c3e50;
+        font-size: 1.6rem;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+
+    .edit-subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    .edit-form {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    /* Top Section: Photo left, Info right - BALANCED HEIGHT */
+    .form-top-section {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: flex-start; /* Align top */
+    }
+
+    @media (max-width: 768px) {
+        .form-top-section {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+    }
+
+    /* Photo Section (Left) - INCREASED HEIGHT */
+    .photo-section {
+        flex: 0 0 220px; /* Slightly increased */
+        min-height: 360px; /* Added min-height to match info section */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .photo-container {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 8px;
+        padding: 1.2rem; /* Increased from 1rem */
+        border: 1px solid #dee2e6;
+        text-align: center;
+        flex: 1; /* Take available space */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .current-photo-title {
+        color: #2c3e50;
+        font-size: 1rem; /* Increased from 0.95rem */
+        margin-bottom: 1rem; /* Increased from 0.8rem */
+        font-weight: 600;
+    }
+
+    .current-photo-wrapper {
+        margin-bottom: 1.2rem; /* Increased from 1rem */
+        flex-grow: 0;
+    }
+
+    .current-photo {
+        width: 140px; /* Increased from 120px */
+        height: 140px; /* Increased from 120px */
+        border-radius: 8px;
+        object-fit: cover;
+        border: 3px solid #3498db;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .no-photo-box {
+        width: 140px;
+        height: 140px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #ddd;
+        margin: 0 auto;
+    }
+
+    .no-photo-box i {
+        font-size: 3rem; /* Increased from 2.5rem */
+        color: #95a5a6;
+    }
+
+    .upload-section {
+        margin-top: auto; /* Push to bottom */
+        padding-top: 1.2rem; /* Increased from 1rem */
+        border-top: 1px solid #dee2e6;
+        flex-grow: 0;
+    }
+
+    .upload-title {
+        color: #2c3e50;
+        font-size: 0.9rem; /* Slightly increased */
+        margin-bottom: 0.9rem; /* Slightly increased */
+        font-weight: 600;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: block;
+        width: 100%;
+        margin-bottom: 0.9rem; /* Increased from 0.8rem */
+    }
+
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-input-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem; /* Increased from 0.4rem */
+        padding: 0.7rem 1rem; /* Increased from 0.6rem 0.8rem */
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: 1px solid #2980b9;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.85rem; /* Slightly increased */
+        font-weight: 500;
+    }
+
+    .file-input-label:hover {
+        background: linear-gradient(135deg, #2980b9, #1c6ea4);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+    }
+
+    .file-input-label i {
+        font-size: 1rem; /* Increased from 0.9rem */
+    }
+
+    .remove-photo-option {
+        margin-top: 1rem; /* Increased from 0.8rem */
+        text-align: center;
+    }
+
+    .remove-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem; /* Increased from 0.4rem */
+    }
+
+    .remove-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .remove-checkbox label {
+        color: #666;
+        font-size: 0.8rem; /* Slightly increased */
+        cursor: pointer;
+    }
+
+    /* Information Section (Right) */
+    .info-section {
+        flex: 1;
+        min-height: 360px; /* Match photo section height */
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-left: 0.4rem;
+        border-left: 3px solid #3498db;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* Form grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.3rem;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #e74c3c;
+        font-size: 0.9em;
+    }
+
+    .form-input {
+        width: 90%;
+        max-width: 300px;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        background: white;
+        display: block;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-textarea {
+        width: 95%;
+        max-width: 450px;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        min-height: 70px;
+        resize: vertical;
+        transition: all 0.2s;
+        font-family: inherit;
+        display: block;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-help {
+        display: block;
+        margin-top: 0.2rem;
+        color: #7f8c8d;
+        font-size: 0.75rem;
+        font-style: italic;
+        max-width: 300px;
+    }
+
+    /* Bottom Sections */
+    .form-bottom-section {
+        margin-top: 1.5rem;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    /* Account Status */
+    .status-section {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 0.8rem;
+        max-width: 400px;
+    }
+
+    .status-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 24px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+        background-color: #2ecc71;
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f0f0f0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+
+    .btn-update:hover {
+        background: linear-gradient(135deg, #2980b9, #1c6ea4);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-cancel {
+        background: #95a5a6;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        min-width: 150px;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #7f8c8d;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(149, 165, 166, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .edit-container {
+            padding: 0 1rem;
+            margin: 1rem auto;
+        }
+        
+        .edit-form {
+            padding: 1.2rem;
+        }
+        
+        .photo-section {
+            flex: 0 0 auto;
+            width: 100%;
+            min-height: auto;
+        }
+        
+        .info-section {
+            min-height: auto;
+        }
+        
+        .current-photo,
+        .no-photo-box {
+            width: 120px; /* Adjusted for mobile */
+            height: 120px;
+        }
+        
+        .no-photo-box i {
+            font-size: 2.5rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .form-help {
+            max-width: 100%;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .btn-update,
+        .btn-cancel {
+            min-width: 100%;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .edit-title {
+            font-size: 1.4rem;
+        }
+        
+        .edit-form {
+            padding: 1rem;
+        }
+        
+        .form-section {
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+        }
+        
+        .current-photo,
+        .no-photo-box {
+            width: 110px;
+            height: 110px;
+        }
+        
+        .no-photo-box i {
+            font-size: 2.2rem;
+        }
+        
+        .file-input-label {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-update,
+        .btn-cancel {
+            padding: 0.6rem 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="edit-header">
+        <h1 class="edit-title">Edit Teacher Account</h1>
+        <p class="edit-subtitle">Update details for {{ teacher.full_name }}</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="edit-form">
+        {% csrf_token %}
+        
+        <!-- Top Section: Photo (Left) & Personal Info (Right) - BALANCED -->
+        <div class="form-top-section">
+            <!-- Left: Photo Section - BALANCED HEIGHT -->
+            <div class="photo-section">
+                <div class="photo-container">
+                    <h3 class="current-photo-title">Profile Photo</h3>
+                    <div class="current-photo-wrapper">
+                        {% if profile.photo %}
+                            <img src="{{ profile.photo.url }}" alt="{{ teacher.full_name }}" class="current-photo">
+                        {% else %}
+                            <div class="no-photo-box">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Upload Section -->
+                    <div class="upload-section">
+                        <div class="file-input-wrapper">
+                            <input type="file" name="photo" id="photo" class="form-input" accept="image/*">
+                            <label for="photo" class="file-input-label">
+                                <i class="fas fa-upload"></i>
+                                <span>Upload Photo</span> <!-- Added "Photo" for clarity -->
+                            </label>
+                        </div>
+                        
+                        <!-- Remove Photo Option -->
+                        {% if profile.photo %}
+                        <div class="remove-photo-option">
+                            <div class="remove-checkbox">
+                                <input type="checkbox" name="remove_photo" id="remove_photo" value="1">
+                                <label for="remove_photo">Remove Photo</label> <!-- Added "Photo" -->
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Personal Information -->
+            <div class="info-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i> Personal Information
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="teacher_id" class="form-label">Teacher ID</label>
+                        <input type="text" name="teacher_id" id="teacher_id" class="form-input" 
+                               value="{{ profile.teacher_id|default:'' }}">
+                        <span class="form-help">Leave blank to auto-generate</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="first_name" class="form-label required">First Name</label>
+                        <input type="text" name="first_name" id="first_name" class="form-input" 
+                               value="{{ teacher.first_name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="middle_name" class="form-label">Middle Name</label>
+                        <input type="text" name="middle_name" id="middle_name" class="form-input" 
+                               value="{{ profile.middle_name|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name" class="form-label required">Last Name</label>
+                        <input type="text" name="last_name" id="last_name" class="form-input" 
+                               value="{{ teacher.last_name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label required">Email ID</label>
+                        <input type="email" name="email" id="email" class="form-input" 
+                               value="{{ teacher.email }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone_number" class="form-label">Phone Number</label>
+                        <input type="text" name="phone_number" id="phone_number" class="form-input" 
+                               value="{{ teacher.phone_number|default:'' }}">
+                        <span class="form-help">Format: +1234567890 or 1234567890</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Sections: Other Information -->
+        <div class="form-bottom-section">
+            <!-- Professional Information Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-briefcase"></i> Professional Information
+                </h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="designation" class="form-label">Designation</label>
+                        <input type="text" name="designation" id="designation" class="form-input" 
+                               value="{{ profile.designation|default:'' }}">
+                        <span class="form-help">e.g., Professor, Lecturer, Head of Department</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department" class="form-label">Department</label>
+                        <input type="text" name="department" id="department" class="form-input" 
+                               value="{{ profile.department|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="joining_date" class="form-label">Joining Date</label>
+                        <input type="date" name="joining_date" id="joining_date" class="form-input" 
+                               value="{{ profile.joining_date|date:'Y-m-d'|default:'' }}">
+                    </div>
+                </div>
+                
+
+            </div>
+
+            <!-- Account Status Section -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-shield"></i> Account Settings
+                </h2>
+                <div class="status-section">
+                    <div class="status-toggle">
+                        <label class="form-label" style="margin-bottom: 0;">Account Status</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" name="is_active" id="is_active" 
+                                   {% if teacher.is_active %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </div>
+                        <span style="font-weight: 600; font-size: 0.85rem; color: {% if teacher.is_active %}#2ecc71{% else %}#e74c3c{% endif %};">
+                            {% if teacher.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                    <span class="form-help" style="margin-top: 0.3rem; display: block; font-size: 0.75rem;">
+                        Toggle to activate/deactivate this teacher's account
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-update">
+                <i class="fas fa-save"></i> Update Teacher
+            </button>
+            <a href="{% url 'teacher_list' %}" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Preview uploaded photo
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const currentPhoto = document.querySelector('.current-photo');
+                const noPhotoBox = document.querySelector('.no-photo-box');
+                
+                if (currentPhoto) {
+                    currentPhoto.src = e.target.result;
+                } else if (noPhotoBox) {
+                    noPhotoBox.innerHTML = `<img src="${e.target.result}" class="current-photo" alt="Preview">`;
+                } else {
+                    const container = document.querySelector('.current-photo-wrapper');
+                    container.innerHTML = `<img src="${e.target.result}" class="current-photo" alt="Preview">`;
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Toggle switch label update
+    document.getElementById('is_active').addEventListener('change', function(e) {
+        const statusLabel = document.querySelector('.status-toggle span:last-child');
+        if (e.target.checked) {
+            statusLabel.textContent = 'Active';
+            statusLabel.style.color = '#2ecc71';
+        } else {
+            statusLabel.textContent = 'Inactive';
+            statusLabel.style.color = '#e74c3c';
+        }
+    });
+</script>
+{% endblock %}

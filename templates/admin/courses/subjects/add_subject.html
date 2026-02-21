@@ -1,0 +1,626 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Subject{% if course %} to {{ course.short_name }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .add-subject-container {
+        max-width: 600px;
+        margin: 1.5rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #3498db;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+
+    .subject-form {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+        padding-left: 0.5rem;
+        border-left: 3px solid #3498db;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: #3498db;
+        font-size: 1.1rem;
+    }
+
+    .form-group {
+        padding: 0 25px 0 0;
+        margin-bottom: 1.2rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #e74c3c;
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        padding: 0.7rem 0.8rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+    .form-help {
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        font-style: italic;
+    }
+
+    .form-error {
+        color: #e74c3c;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+    }
+
+    .error-input {
+        border-color: #e74c3c !important;
+    }
+
+    .error-input:focus {
+        box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #27ae60, #219653);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        text-align: center;
+        min-width: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .cancel-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+    }
+
+    /* Course info box */
+    .course-info-box {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .course-info-title {
+        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-details {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .course-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-detail-label {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin-bottom: 0.2rem;
+    }
+
+    .course-detail-value {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    /* Period info */
+    .period-info {
+        background: #e8f4fc;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .period-title {
+        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Field character counter */
+    .char-counter {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        text-align: right;
+        margin-top: 0.2rem;
+    }
+
+    .char-counter.warning {
+        color: #f39c12;
+    }
+
+    .char-counter.error {
+        color: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+        .add-subject-container {
+            padding: 0 1rem;
+            margin: 1rem auto;
+        }
+        
+        .subject-form {
+            padding: 1.2rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .form-header p {
+            font-size: 0.9rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
+            min-width: auto;
+            padding: 0.7rem;
+        }
+        
+        .course-details {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .add-subject-container {
+            padding: 0 0.5rem;
+        }
+        
+        .subject-form {
+            padding: 1rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .form-header p {
+            font-size: 0.85rem;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+        }
+        
+        .form-input,
+        .form-select {
+            padding: 0.6rem 0.7rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="add-subject-container">
+    <div class="form-header">
+        <h1>Add New Subject</h1>
+        <p>{% if course %}Add a subject to {{ course.name }}{% else %}Create a new subject{% endif %}</p>
+    </div>
+
+    <form method="post" class="subject-form" id="subjectForm">
+        {% csrf_token %}
+
+        <!-- Course Information -->
+        {% if course %}
+        <div class="course-info-box">
+            <div class="course-info-title">
+                <i class="fas fa-book"></i> Course Information
+            </div>
+            <div class="course-details">
+                <div class="course-detail-item">
+                    <div class="course-detail-label">Course Name</div>
+                    <div class="course-detail-value">{{ course.name }}</div>
+                </div>
+                <div class="course-detail-item">
+                    <div class="course-detail-label">Short Name</div>
+                    <div class="course-detail-value">{{ course.short_name }}</div>
+                </div>
+                <div class="course-detail-item">
+                    <div class="course-detail-label">Course Type</div>
+                    <div class="course-detail-value">{{ course.get_course_type_display }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Period Information -->
+        {% if request.GET.semester or request.GET.year %}
+        <div class="period-info">
+            <div class="period-title">
+                <i class="fas fa-calendar-alt"></i> Adding to
+            </div>
+            <div class="course-details">
+                {% if request.GET.semester %}
+                <div class="course-detail-item">
+                    <div class="course-detail-label">Semester</div>
+                    <div class="course-detail-value">{{ request.GET.semester }}</div>
+                </div>
+                {% endif %}
+                {% if request.GET.year %}
+                <div class="course-detail-item">
+                    <div class="course-detail-label">Year</div>
+                    <div class="course-detail-value">{{ request.GET.year }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="fas fa-book-open"></i> Subject Details
+            </h2>
+
+            <!-- Course Selection (only if not already specified) -->
+            {% if not course %}
+            <div class="form-group">
+                <label for="id_course" class="form-label required">
+                    Course
+                </label>
+                {{ form.course }}
+                {% if form.course.errors %}
+                <div class="form-error">{{ form.course.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% else %}
+            <input type="hidden" name="course" value="{{ course.id }}">
+            {% endif %}
+
+            <!-- Semester/Year Selection -->
+            {% if course %}
+                {% if course.course_type == 'semester' %}
+                <div class="form-group">
+                    <label for="id_semester" class="form-label required">
+                        Semester
+                    </label>
+                    {{ form.semester }}
+                    {% if form.semester.errors %}
+                    <div class="form-error">{{ form.semester.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="form-group">
+                    <label for="id_year" class="form-label required">
+                        Year
+                    </label>
+                    {{ form.year }}
+                    {% if form.year.errors %}
+                    <div class="form-error">{{ form.year.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Subject Code -->
+            <div class="form-group">
+                <label for="id_code" class="form-label required">
+                    Subject Code
+                </label>
+                {{ form.code }}
+                <div class="char-counter" id="codeCounter">
+                    <span id="codeChars">{{ form.code.value|default:''|length }}</span>/20
+                </div>
+                {% if form.code.errors %}
+                <div class="form-error">{{ form.code.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Subject code must be unique within the course</div>
+            </div>
+
+            <!-- Subject Name -->
+            <div class="form-group">
+                <label for="id_name" class="form-label required">
+                    Subject Name
+                </label>
+                {{ form.name }}
+                <div class="char-counter" id="nameCounter">
+                    <span id="nameChars">{{ form.name.value|default:''|length }}</span>/200
+                </div>
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Subject Teacher -->
+            <div class="form-group">
+                <label for="id_teacher" class="form-label">
+                    Subject Teacher
+                </label>
+                {{ form.teacher }}
+                {% if form.teacher.errors %}
+                <div class="form-error">{{ form.teacher.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Optional - you can assign a teacher to this subject</div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Create Subject
+            </button>
+            <a href="{% if course %}{% url 'courses:view_course' course.id %}{% else %}{% url 'courses:subject_list' %}{% endif %}" 
+               class="cancel-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Character counters
+    const codeField = document.getElementById('id_code');
+    const nameField = document.getElementById('id_name');
+
+    if (codeField) {
+        codeField.addEventListener('input', function(e) {
+            const length = this.value.length;
+            const counter = document.getElementById('codeChars');
+            const counterDiv = document.getElementById('codeCounter');
+            
+            counter.textContent = length;
+            
+            if (length > 15) {
+                counterDiv.classList.add('warning');
+                counterDiv.classList.remove('error');
+            } else if (length >= 20) {
+                counterDiv.classList.remove('warning');
+                counterDiv.classList.add('error');
+            } else {
+                counterDiv.classList.remove('warning', 'error');
+            }
+            
+            // Auto-uppercase
+            this.value = this.value.toUpperCase();
+        });
+        
+        // Trigger on load
+        codeField.dispatchEvent(new Event('input'));
+    }
+
+    if (nameField) {
+        nameField.addEventListener('input', function(e) {
+            const length = this.value.length;
+            const counter = document.getElementById('nameChars');
+            const counterDiv = document.getElementById('nameCounter');
+            
+            counter.textContent = length;
+            
+            if (length > 180) {
+                counterDiv.classList.add('warning');
+                counterDiv.classList.remove('error');
+            } else if (length >= 200) {
+                counterDiv.classList.remove('warning');
+                counterDiv.classList.add('error');
+            } else {
+                counterDiv.classList.remove('warning', 'error');
+            }
+        });
+        
+        // Trigger on load
+        nameField.dispatchEvent(new Event('input'));
+    }
+
+    // Form validation
+    document.getElementById('subjectForm').addEventListener('submit', function(e) {
+        const code = document.getElementById('id_code')?.value.trim();
+        const name = document.getElementById('id_name')?.value.trim();
+        
+        // For course-specific fields
+        const courseSelect = document.getElementById('id_course');
+        const semesterSelect = document.getElementById('id_semester');
+        const yearSelect = document.getElementById('id_year');
+        
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll('.field-error').forEach(error => error.remove());
+        document.querySelectorAll('.form-input, .form-select').forEach(field => {
+            field.classList.remove('error-input');
+        });
+
+        // Validate Subject Code
+        if (!code) {
+            showError('id_code', 'Subject code is required');
+            isValid = false;
+        } else if (code.length < 2) {
+            showError('id_code', 'Subject code must be at least 2 characters');
+            isValid = false;
+        }
+
+        // Validate Subject Name
+        if (!name) {
+            showError('id_name', 'Subject name is required');
+            isValid = false;
+        } else if (name.length < 3) {
+            showError('id_name', 'Subject name must be at least 3 characters');
+            isValid = false;
+        }
+
+        // Validate Course (if dropdown exists)
+        if (courseSelect && !courseSelect.value) {
+            showError('id_course', 'Please select a course');
+            isValid = false;
+        }
+
+        // Validate Semester/Year (if applicable)
+        if (semesterSelect && !semesterSelect.value) {
+            showError('id_semester', 'Please select a semester');
+            isValid = false;
+        }
+        
+        if (yearSelect && !yearSelect.value) {
+            showError('id_year', 'Please select a year');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.error-input');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+
+    // Helper function to show error
+    function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.add('error-input');
+            
+            let errorDiv = field.parentNode.querySelector('.field-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error field-error';
+                errorDiv.textContent = message;
+                field.parentNode.insertBefore(errorDiv, field.nextSibling);
+            } else {
+                errorDiv.textContent = message;
+            }
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply error styling to any existing Django form errors
+        document.querySelectorAll('.form-error').forEach(error => {
+            const fieldId = error.previousElementSibling?.id;
+            if (fieldId) {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.classList.add('error-input');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

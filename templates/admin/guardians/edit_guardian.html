@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Guardian{% endblock %}
+
+{% block content %}
+<h1>Edit Guardian</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>First name</label>
+    <input type="text" name="first_name" value="{{ user.first_name }}" class="form-control">
+
+    <label>Last name</label>
+    <input type="text" name="last_name" value="{{ user.last_name }}" class="form-control">
+
+    <label>Email</label>
+    <input type="email" name="email" value="{{ user.email }}" class="form-control">
+
+    <label>Phone</label>
+    <input type="text" name="phone_number" value="{{ user.phone_number }}" class="form-control">
+
+    <hr>
+    <label>Guardian ID</label>
+    <input type="text" name="guardian_id" value="{{ profile.guardian_id }}" class="form-control">
+
+    <label>Relation</label>
+    <input type="text" name="relation_to_student" value="{{ profile.relation_to_student }}" class="form-control">
+
+    <label>Occupation</label>
+    <input type="text" name="occupation" value="{{ profile.occupation }}" class="form-control">
+
+    <label>Address</label>
+    <textarea name="address" class="form-control">{{ profile.address }}</textarea>
+
+    <label>Photo</label>
+    <input type="file" name="photo" class="form-control">
+
+    <br>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

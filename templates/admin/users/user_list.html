@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Users</h1>
+
+    <form method="get" style="margin-bottom:1rem;">
+        <input type="text" name="search" placeholder="Search by name or email" value="{{ search_query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    {% comment %} Teachers section {% endcomment %}
+    <section>
+        <h2>Teachers ({{ teachers.count }})</h2>
+        {% if teachers.exists %}
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in teachers %}
+                <tr>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{% url 'view_teacher' user.id %}">View</a>
+                        <a href="{% url 'edit_teacher' user.id %}">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No teachers found.</p>
+        {% endif %}
+    </section>
+
+    {% comment %} Students section {% endcomment %}
+    <section>
+        <h2>Students ({{ students.count }})</h2>
+        {% if students.exists %}
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Batch</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in students %}
+                <tr>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{% if user.student_profile and user.student_profile.batch %}{{ user.student_profile.batch.name }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if user.student_profile %}
+                            <a href="{% url 'view_student' user.student_profile.id %}">View</a>
+                        {% endif %}
+                        <a href="{% url 'edit_student' user.id %}">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No students found.</p>
+        {% endif %}
+    </section>
+
+    {% comment %} Guardians section {% endcomment %}
+    <section>
+        <h2>Guardians ({{ guardians.count }})</h2>
+        {% if guardians.exists %}
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Children</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in guardians %}
+                <tr>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% with rels=user.students.all %}
+                            {% if rels %}
+                                {% for rel in rels %}
+                                    {{ rel.student.get_full_name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_guardian' user.id %}">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No guardians found.</p>
+        {% endif %}
+    </section>
+
+    {% comment %} Other users {% endcomment %}
+    <section>
+        <h2>Other Users ({{ others.count }})</h2>
+        {% if others.exists %}
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in others %}
+                <tr>
+                    <td>{{ user.get_full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.get_role_display }}</td>
+                    <td><a href="#">Details</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No other users found.</p>
+        {% endif %}
+    </section>
+
+    <a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .teachers-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .teachers-title {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .teachers-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .action-buttons-header {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .btn-create {
+        background: #3498db;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .btn-create:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(52, 152, 219, 0.3);
+    }
+
+    .teachers-table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .teachers-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .teachers-table th {
+        background: #3498db;
+        color: white;
+        padding: 1.2rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .teachers-table th:first-child {
+        border-top-left-radius: 15px;
+    }
+
+    .teachers-table th:last-child {
+        border-top-right-radius: 15px;
+    }
+
+    .teachers-table td {
+        padding: 1.2rem 1rem;
+        border-bottom: 1px solid #eee;
+        color: #2c3e50;
+        vertical-align: middle;
+    }
+
+    .teachers-table tbody tr {
+        transition: background 0.3s;
+    }
+
+    .teachers-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .teachers-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .teacher-email {
+        font-weight: 500;
+        color: #3498db;
+    }
+
+    .teacher-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .teacher-id {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-active { 
+        background: #d4edda; 
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-inactive { 
+        background: #f8d7da; 
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #7f8c8d;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .empty-desc {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Action buttons styling - Perfectly equal icon sizes */
+    .action-buttons {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+    
+    .action-btn {
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px; /* Increased for better icon visibility */
+        height: 36px; /* Increased for better icon visibility */
+        color: white;
+        font-size: 0; /* Hide any text */
+        line-height: 0;
+        overflow: hidden;
+    }
+    
+    /* Make all form buttons consistent with link buttons */
+    .inline-form {
+        display: inline;
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+    }
+    
+    .inline-form button.action-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        font-size: 0;
+        line-height: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Force all FontAwesome icons to be exactly the same size */
+    .action-btn i {
+        font-size: 16px !important; /* Force consistent icon size */
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Icon-only buttons - hide text spans */
+    .action-btn span {
+        display: none !important;
+    }
+    
+    .btn-view {
+        background: #3498db;
+    }
+    
+    .btn-view:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(41, 128, 185, 0.3);
+    }
+    
+    .btn-edit {
+        background: #f39c12;
+    }
+    
+    .btn-edit:hover {
+        background: #d68910;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(243, 156, 18, 0.3);
+    }
+    
+    /* DELETE button */
+    .btn-delete {
+        background: #e74c3c;
+    }
+    
+    .btn-delete:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+    }
+    
+    /* Toggle status button */
+    .btn-toggle {
+        background: #2ecc71;
+    }
+    
+    .btn-toggle.inactive {
+        background: #95a5a6;
+    }
+    
+    .btn-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Profile photo */
+    .teacher-photo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e0e0e0;
+    }
+
+    .no-photo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #95a5a6;
+        border: 2px solid #ddd;
+    }
+
+    /* Search and filter */
+    .search-filter-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .search-btn {
+        background: #3498db;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-btn:hover {
+        background: #2980b9;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .teachers-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .action-buttons-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .btn-create {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .teachers-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .search-filter-container {
+            flex-direction: column;
+        }
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .search-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            width: 34px;
+            height: 34px;
+        }
+        
+        .inline-form button.action-btn {
+            width: 34px;
+            height: 34px;
+        }
+        
+        .action-btn i {
+            font-size: 15px !important;
+            width: 15px;
+            height: 15px;
+            line-height: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .teachers-table th,
+        .teachers-table td {
+            padding: 0.8rem 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .inline-form button.action-btn {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .action-btn i {
+            font-size: 14px !important;
+            width: 14px;
+            height: 14px;
+            line-height: 14px;
+        }
+        
+        .action-buttons {
+            gap: 0.3rem;
+        }
+        
+        .teacher-photo,
+        .no-photo {
+            width: 35px;
+            height: 35px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .action-btn {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .inline-form button.action-btn {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .action-btn i {
+            font-size: 13px !important;
+            width: 13px;
+            height: 13px;
+            line-height: 13px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="teachers-header">
+    <div>
+        <h1 class="teachers-title">Teacher Management</h1>
+        <p class="teachers-subtitle">Manage all teacher accounts in the system</p>
+    </div>
+    
+    <div class="action-buttons-header">
+        <a href="{% url 'create_teacher' %}" class="btn-create">
+            <i class="fas fa-plus-circle"></i> Add New Teacher
+        </a>
+    </div>
+</div>
+
+<!-- Search Box -->
+<form method="get" action="{% url 'teacher_list' %}" class="search-filter-container">
+    <div class="search-box">
+        <input type="text" 
+               name="search" 
+               placeholder="Search teachers by name, email, or ID..." 
+               class="search-input"
+               value="{{ search_query|default:'' }}">
+    </div>
+    
+    <button type="submit" class="search-btn">
+        <i class="fas fa-search"></i> Search
+    </button>
+    
+    {% if search_query %}
+    <a href="{% url 'teacher_list' %}" class="search-btn" style="background: #95a5a6;">
+        <i class="fas fa-times"></i> Clear
+    </a>
+    {% endif %}
+</form>
+
+<div class="teachers-table-container">
+    {% if teachers %}
+    <table class="teachers-table">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            {% with profile=teacher.teacher_profile %}
+            <tr>
+                <td>
+                    {% if profile.photo %}
+                    <img src="{{ profile.photo.url }}" alt="{{ teacher.get_full_name }}" class="teacher-photo">
+                    {% else %}
+                    <div class="no-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="teacher-id">{{ profile.teacher_id|default:"-" }}</span>
+                </td>
+                <td>
+                    <div class="teacher-name">
+                        {{ teacher.first_name }} {{ teacher.last_name }}
+                    </div>
+                </td>
+                <td>
+                    <div class="teacher-email">{{ teacher.email }}</div>
+                </td>
+                <td>{{ teacher.phone_number|default:"-" }}</td>
+                <td>
+                    <span class="status-badge status-{% if teacher.is_active %}active{% else %}inactive{% endif %}">
+                        {% if teacher.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <!-- View Button - Icon Only -->
+                        <a href="{% url 'view_teacher' teacher.id %}" 
+                           class="action-btn btn-view" 
+                           title="View Details">
+                            <i class="fas fa-eye"></i>
+                            <span>View</span>
+                        </a>
+                        
+                        <!-- Edit Button - Icon Only -->
+                        <a href="{% url 'edit_teacher' teacher.id %}" 
+                           class="action-btn btn-edit" 
+                           title="Edit Teacher">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit</span>
+                        </a>
+                        
+                        <!-- Delete Button - Icon Only -->
+                        <form method="post" action="{% url 'delete_user' teacher.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                   class="action-btn btn-delete" 
+                                   title="Delete Teacher"
+                                   onclick="return confirm('Are you sure you want to delete {{ teacher.email }}? This action cannot be undone.')">
+                                <i class="fas fa-trash"></i>
+                                <span>Delete</span>
+                            </button>
+                        </form>
+                        
+                        <!-- Toggle Status Button - Icon Only -->
+                        <form method="post" action="{% url 'toggle_user_status' teacher.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                   class="action-btn btn-toggle {% if not teacher.is_active %}inactive{% endif %}" 
+                                   title="{% if teacher.is_active %}Deactivate{% else %}Activate{% endif %} Teacher"
+                                   onclick="return confirm('Are you sure you want to {% if teacher.is_active %}deactivate{% else %}activate{% endif %} {{ teacher.email }}?')">
+                                {% if teacher.is_active %}
+                                <i class="fas fa-user-slash"></i>
+                                <span>Deactivate</span>
+                                {% else %}
+                                <i class="fas fa-user-check"></i>
+                                <span>Activate</span>
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👨‍🏫</div>
+        <h2 class="empty-title">No Teachers Found</h2>
+        <p class="empty-desc">
+            {% if search_query %}
+                No teachers match your search "{{ search_query }}".
+            {% else %}
+                No teachers in the system yet. Add your first teacher!
+            {% endif %}
+        </p>
+        <a href="{% url 'create_teacher' %}" class="btn-create" style="display: inline-block;">
+            <i class="fas fa-plus-circle"></i> Add First Teacher
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-submit search on Enter key
+    document.querySelector('.search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            this.form.submit();
+        }
+    });
+</script>
+{% endblock %}

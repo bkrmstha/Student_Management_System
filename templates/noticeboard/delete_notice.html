@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Notice{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-notice-container {
+        max-width: 500px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .delete-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .delete-header h1 {
+        color: #e74c3c;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .delete-header p {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+
+    .delete-confirmation {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        border: 2px solid #e74c3c;
+    }
+
+    .warning-message {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        color: #856404;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .warning-message::before {
+        content: "⚠️";
+        flex-shrink: 0;
+    }
+
+    .notice-preview {
+        background: #f8f9fa;
+        border: 1px solid #ecf0f1;
+        border-radius: 6px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .notice-preview-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .notice-preview-meta {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .notice-preview-meta span {
+        display: flex;
+        gap: 0.3rem;
+    }
+
+    .notice-preview-content {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+
+    .confirm-text {
+        color: #2c3e50;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c0392b;
+    }
+
+    .btn-cancel {
+        background: #ecf0f1;
+        color: #7f8c8d;
+    }
+
+    .btn-cancel:hover {
+        background: #bdc3c7;
+    }
+
+    @media (max-width: 600px) {
+        .delete-notice-container {
+            margin: 1.5rem auto;
+        }
+
+        .form-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-notice-container">
+    <div class="delete-header">
+        <h1>⚠️ Delete Notice</h1>
+        <p>This action cannot be undone</p>
+    </div>
+
+    <div class="delete-confirmation">
+        <div class="warning-message">
+            This will permanently delete the notice and all associated comments and attachments.
+        </div>
+
+        <div class="notice-preview">
+            <div class="notice-preview-title">
+                {{ notice.title }}
+            </div>
+            <div class="notice-preview-meta">
+                <span>
+                    📅 {{ notice.created_at|date:"d M Y, H:i" }}
+                </span>
+                <span>
+                    👤 {{ notice.created_by.first_name }} {{ notice.created_by.last_name }}
+                </span>
+                {% if notice.priority %}
+                    <span>
+                        🚨 {{ notice.get_priority_display }}
+                    </span>
+                {% endif %}
+                {% if notice.is_important %}
+                    <span>
+                        ⭐ Important
+                    </span>
+                {% endif %}
+            </div>
+            <div class="notice-preview-content">
+                {{ notice.content|truncatewords:100 }}
+            </div>
+        </div>
+
+        <p class="confirm-text">
+            Are you absolutely sure you want to delete this notice?
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-delete">Yes, Delete This Notice</button>
+                <a href="{% url 'noticeboard:notice_detail' notice.id %}" class="btn btn-cancel">No, Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

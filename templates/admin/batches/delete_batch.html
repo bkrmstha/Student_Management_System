@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Batch: {{ batch.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-batch-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .delete-warning {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        border: 2px solid #dc3545;
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
+
+    .warning-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .warning-text {
+        color: #495057;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .batch-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .batch-details strong {
+        color: #2c3e50;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-confirm, .btn-cancel {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-confirm {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-confirm:hover {
+        background: #c82333;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-batch-container">
+    <div class="delete-warning">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1 class="warning-title">Delete Batch</h1>
+        <div class="warning-text">
+            <p>Are you sure you want to delete the batch <strong>"{{ batch.name }}"</strong>?</p>
+            <p>This action <strong>cannot be undone</strong> and will permanently remove the batch and all its associated data.</p>
+        </div>
+
+        <div class="batch-details">
+            <p><strong>Batch Name:</strong> {{ batch.name }}</p>
+            <p><strong>Year:</strong> {{ batch.year }}</p>
+            <p><strong>Status:</strong> {% if batch.is_active %}Active{% else %}Inactive{% endif %}</p>
+            {% if batch.start_date %}
+                <p><strong>Start Date:</strong> {{ batch.start_date|date:"M d, Y" }}</p>
+            {% endif %}
+            {% if batch.end_date %}
+                <p><strong>End Date:</strong> {{ batch.end_date|date:"M d, Y" }}</p>
+            {% endif %}
+            <p><strong>Created:</strong> {{ batch.date_created|date:"M d, Y" }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'view_batch' batch.id %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-confirm">
+                    <i class="fas fa-trash"></i> Yes, Delete Batch
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .dashboard-title {
+        color: #2c3e50;
+        font-size: 2.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--card-color), transparent);
+    }
+
+    .stat-card.subjects { --card-color: #2ecc71; }
+    .stat-card.courses { --card-color: #3498db; }
+    .stat-card.students { --card-color: #9b59b6; }
+    .stat-card.absent { --card-color: #e74c3c; }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.85;
+    }
+
+    .stat-title {
+        color: #7f8c8d;
+        font-size: 1rem;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        color: #2c3e50;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+        color: var(--card-color);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .notice-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid #3498db;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-title { font-size: 1.8rem; }
+        .stats-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 class="dashboard-title">Teacher Dashboard</h1>
+    <p class="dashboard-subtitle">Welcome back, {{ user.first_name }} 👋</p>
+</div>
+
+<div class="stats-grid">
+    <a href="{% url 'courses:teacher_subjects' %}" class="stat-card subjects">
+        <div class="stat-icon">📚</div>
+        <h3 class="stat-title">Subjects</h3>
+        <div class="stat-value">{{ subjects_count|default:0 }}</div>
+        <div class="stat-change">Assigned</div>
+    </a>
+
+    <a href="{% url 'courses:course_list' %}" class="stat-card courses">
+        <div class="stat-icon">📖</div>
+        <h3 class="stat-title">Courses</h3>
+        <div class="stat-value">{{ courses_count|default:0 }}</div>
+        <div class="stat-change">Teaching</div>
+    </a>
+
+    <a href="{% url 'student_list' %}" class="stat-card students">
+        <div class="stat-icon">🎓</div>
+        <h3 class="stat-title">Students</h3>
+        <div class="stat-value">{{ students_count|default:0 }}</div>
+        <div class="stat-change">Across your classes</div>
+    </a>
+
+    <a href="{% url 'absent_list' %}" class="stat-card absent">
+        <div class="stat-icon">⚠️</div>
+        <h3 class="stat-title">Today's Absent</h3>
+        <div class="stat-value">{{ absent_count|default:0 }}</div>
+        <div class="stat-change">Distinct students</div>
+    </a>
+</div>
+
+<div class="notice-section">
+    {% if latest_notice %}
+        <h2 class="section-title">{{ latest_notice.title }}</h2>
+        <p>{{ latest_notice.content|truncatechars:300 }}</p>
+        <p><a href="{% url 'noticeboard:notice_detail' latest_notice.id %}">Read full notice</a></p>
+    {% else %}
+        <h2 class="section-title">Notice Board</h2>
+        <p>No active notices at the moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

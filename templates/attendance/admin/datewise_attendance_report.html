@@ -1,0 +1,1113 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Session Details - Student Management System{% endblock %}
+
+{% block content %}
+
+<div class="attendance-session-header d-flex justify-content-between align-items-center mb-4">
+  <h2 class="attendance-session-title">Attendance Session Details</h2>
+  <button onclick="window.print()" class="btn btn-primary print-btn">
+    <i class="fas fa-print"></i> Print
+  </button>
+</div>
+
+<!-- Session Information -->
+<div class="card session-info-card mb-4 print-session-info">
+  <div class="card-header session-info-header">
+    <h5 class="mb-0">Session Information</h5>
+  </div>
+  <div class="card-body">
+    <div class="session-info-row">
+      <!-- Batch -->
+      <div class="session-info-item">
+        <div class="session-info-label">Batch</div>
+        <div class="session-info-value">
+          {{ session.batch.name }} 
+          {% if session.course.short_name %}
+            - {{ session.course.short_name }}
+          {% else %}
+            - {{ session.course.name|slice:":20" }}{% if session.course.name|length > 20 %}...{% endif %}
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Separator -->
+      <div class="session-info-separator">|</div>
+      
+      <!-- Subject -->
+      <div class="session-info-item">
+        <div class="session-info-label">Subject</div>
+        <div class="session-info-value">
+          {{ session.subject.name }} 
+          {% if session.subject.code %}
+            ({{ session.subject.code }})
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Separator -->
+      <div class="session-info-separator">|</div>
+      
+      <!-- Semester/Year -->
+      <div class="session-info-item">
+        <div class="session-info-label">
+          {% if session.course.course_type == 'semester' %}Semester
+          {% elif session.course.course_type == 'yearly' %}Year
+          {% else %}Period{% endif %}
+        </div>
+        <div class="session-info-value">
+          {% if session.course.course_type == 'semester' %}
+            {% if session.subject.semester %}{{ session.subject.semester }}{% else %}-{% endif %}
+          {% elif session.course.course_type == 'yearly' %}
+            {% if session.subject.year %}{{ session.subject.year }}{% else %}-{% endif %}
+          {% else %}
+            -
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Separator -->
+      <div class="session-info-separator">|</div>
+      
+      <!-- Teacher -->
+      <div class="session-info-item">
+        <div class="session-info-label">Teacher</div>
+        <div class="session-info-value">
+          {{ session.teacher.get_full_name|slice:":20" }}{% if session.teacher.get_full_name|length > 20 %}...{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print-only elements (hidden on screen) -->
+<div class="print-header d-none">
+  <h1 class="print-title">Attendance Record</h1>
+  <div class="print-session-info">
+    <div class="print-row">
+      <span class="print-label">BATCH:</span>
+      <span class="print-value">
+        {{ session.batch.name }} 
+        {% if session.course.short_name %}
+          - {{ session.course.short_name }}
+        {% else %}
+          - {{ session.course.name|slice:":20" }}{% if session.course.name|length > 20 %}...{% endif %}
+        {% endif %}
+      </span>
+    </div>
+    <div class="print-row">
+      <span class="print-label">SUBJECT:</span>
+      <span class="print-value">
+        {{ session.subject.name }} 
+        {% if session.subject.code %}
+          ({{ session.subject.code }})
+        {% endif %}
+      </span>
+    </div>
+    <div class="print-row">
+      <span class="print-label">{% if session.course.course_type == 'semester' %}SEMESTER{% elif session.course.course_type == 'yearly' %}YEAR{% else %}PERIOD{% endif %}:</span>
+      <span class="print-value">
+        {% if session.course.course_type == 'semester' %}
+          {% if session.subject.semester %}{{ session.subject.semester }}{% else %}-{% endif %}
+        {% elif session.course.course_type == 'yearly' %}
+          {% if session.subject.year %}{{ session.subject.year }}{% else %}-{% endif %}
+        {% else %}
+          -
+        {% endif %}
+      </span>
+    </div>
+    <div class="print-row">
+      <span class="print-label">TEACHER:</span>
+      <span class="print-value">
+        {{ session.teacher.get_full_name|slice:":20" }}{% if session.teacher.get_full_name|length > 20 %}...{% endif %}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Table -->
+<div class="card attendance-table-card print-attendance-table">
+  <div class="card-header attendance-table-header">
+    <h5 class="mb-0">Attendance Records</h5>
+  </div>
+  <div class="card-body p-0">
+
+    {% if attendance_matrix %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm attendance-table mb-0">
+        <colgroup>
+          <col class="col-date-header">
+          <col class="col-year-header">
+          {% for date in dates %}
+          <col class="col-date">
+          {% endfor %}
+          <col class="col-present">
+          <col class="col-absent">
+        </colgroup>
+        <thead>
+          <tr>
+            <th rowspan="3" class="date-header">Date</th>
+            <th class="year-header">Year</th>
+            {% for date in dates %}<th class="year-cell">{{ date|date:"Y" }}</th>{% endfor %}
+          </tr>
+          <tr>
+            <th class="month-header">Month</th>
+            {% for date in dates %}<th class="month-cell">{{ date|date:"M" }}</th>{% endfor %}
+          </tr>
+          <tr>
+            <th class="day-header">Day</th>
+            {% for date in dates %}<th class="day-cell">{{ date|date:"d" }}</th>{% endfor %}
+          </tr>
+
+          <tr>
+            <th colspan="2">Student</th>
+            <th colspan="{{ dates|length }}">No. of Class</th>
+            <th rowspan="2">Present</th>
+            <th rowspan="2">Absent</th>
+          </tr>
+          <tr>
+            <th class="student-id-header">ID</th>
+            <th class="student-name-header">Name</th>
+            {% for date in dates %}
+            <th class="class-number">{{ forloop.counter }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for student_data in attendance_matrix %}
+          <tr>
+            <td class="student-id">{{ student_data.student.student_id }}</td>
+            <td class="student-name">{{ student_data.student.user.get_full_name }}</td>
+
+            {% for status in student_data.attendance_status %}
+            <td class="attendance-cell">
+              {% if status == 'present' %}
+                <span class="present-mark">P</span>
+              {% elif status == 'absent' %}
+                <span class="absent-mark">A</span>
+              {% else %}
+                <span class="no-attendance">-</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+
+            <td class="present-count">{{ student_data.present_count }}</td>
+            <td class="absent-count">{{ student_data.absent_count }}</td>
+          </tr>
+          {% endfor %}
+
+          <tr class="table-primary fw-bold">
+            <td></td>
+            <td class="text-end">Total Present</td>
+            {% for count in daily_present_counts %}
+            <td>{{ count }}</td>
+            {% endfor %}
+            <td colspan="2"></td>
+          </tr>
+
+          <tr class="table-primary fw-bold">
+            <td></td>
+            <td class="text-end">Total Absent</td>
+            {% for count in daily_absent_counts %}
+            <td>{{ count }}</td>
+            {% endfor %}
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      No attendance records found.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+    :root {
+        --primary-blue: #3498db;
+        --dark-navy: #2c3e50;
+        --bg-light: #f4f7f6;
+        --success-green: #27ae60;
+        --danger-red: #e74c3c;
+        --table-header-blue: #4a6fa5;
+    }
+
+    body {
+        background-color: var(--bg-light);
+    }
+
+    /* ---------- HEADER SECTION ---------- */
+    .attendance-session-header {
+        padding: 15px 0;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100%;
+    }
+
+    .attendance-session-header h2 {
+        color: var(--dark-navy);
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .print-btn {
+        background: var(--primary-blue);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 20px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+        display: inline-flex !important;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .print-btn:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    /* ---------- SESSION INFO CARD ---------- */
+    .session-info-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+        background: white;
+    }
+
+    .session-info-header {
+        background: var(--primary-blue) !important;
+        border-radius: 10px 10px 0 0 !important;
+        border: none;
+        padding: 12px 20px !important;
+        min-height: 50px;
+    }
+
+    .session-info-header h5 {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+        margin: 0;
+    }
+
+    .session-info-card .card-body {
+        padding: 15px 25px;
+    }
+
+    /* ---------- HORIZONTAL SESSION INFO LAYOUT ---------- */
+    .session-info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 0;
+        width: 100%;
+    }
+
+    .session-info-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0 15px;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .session-info-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        white-space: nowrap;
+    }
+
+    .session-info-value {
+        font-size: 1.05rem;
+        font-weight: 500;
+        color: var(--dark-navy);
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .session-info-separator {
+        color: #cbd5e1;
+        font-weight: 600;
+        font-size: 1.2rem;
+        padding: 0 5px;
+        user-select: none;
+    }
+
+    /* ---------- ATTENDANCE TABLE CARD ---------- */
+    .attendance-table-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background: white;
+    }
+
+    .attendance-table-header {
+        background: var(--table-header-blue) !important;
+        border-radius: 10px 10px 0 0 !important;
+        border: none;
+        padding: 12px 20px !important;
+        min-height: 50px;
+    }
+
+    .attendance-table-header h5 {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+        margin: 0;
+    }
+
+    .attendance-table-card .card-body {
+        padding: 0;
+    }
+
+    /* ---------- TABLE STYLES WITH AUTO LAYOUT ---------- */
+    .attendance-table {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto; /* Auto layout based on content */
+    }
+
+    /* Column width definitions using colgroup */
+    .col-date-header {
+        width: 60px; /* Fixed width for date header */
+    }
+    
+    .col-year-header {
+        width: 80px; /* Fixed width for year/month/day headers */
+    }
+    
+    .col-date {
+        width: 30px; /* Small fixed width for date columns */
+        min-width: 30px;
+    }
+    
+    .col-present,
+    .col-absent {
+        width: 50px; /* Fixed width for summary columns */
+        min-width: 50px;
+    }
+
+    .attendance-table thead tr {
+        background-color: #f8f9fa;
+    }
+
+    .attendance-table thead tr:last-child {
+        background-color: #ecf0f1;
+        font-weight: 700;
+    }
+
+    /* ALL TABLE HEADERS CENTERED */
+    .attendance-table th {
+        background: #f8f9fa;
+        padding: 8px 4px;
+        text-align: center !important;
+        font-weight: 600;
+        color: var(--dark-navy);
+        font-size: 11px;
+        border: 1px solid #dee2e6;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .attendance-table td {
+        padding: 8px 4px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 12px;
+        border: 1px solid #ecf0f1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Specific column styling */
+    .date-header {
+        text-align: center !important;
+        vertical-align: middle;
+        font-weight: 600;
+    }
+
+    /* Year/Month/Day header cells */
+    .year-header, .month-header, .day-header {
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 6px 4px !important;
+        font-weight: 600 !important;
+        color: var(--dark-navy) !important;
+    }
+
+    /* Year/Month/Day value cells */
+    .year-cell, .month-cell, .day-cell {
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 6px 4px !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+    }
+
+    /* Student ID column - auto width based on content */
+    .student-id-header,
+    .student-id {
+        text-align: center;
+        font-weight: 500;
+        white-space: nowrap;
+        padding-left: 6px;
+        padding-right: 6px;
+        width: auto !important; /* Auto width based on content */
+        min-width: 80px;
+    }
+
+    /* Student Name column - auto width based on content */
+    .student-name-header {
+        text-align: center !important;
+        padding-left: 10px;
+        padding-right: 10px;
+        white-space: nowrap;
+        width: auto !important; /* Auto width based on content */
+        min-width: 150px;
+    }
+    
+    .student-name {
+        text-align: left;
+        padding-left: 10px;
+        padding-right: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: auto !important; /* Auto width based on content */
+        min-width: 150px;
+    }
+
+    /* Attendance cells (date columns) */
+    .class-number,
+    .attendance-cell {
+        text-align: center !important;
+        width: 30px !important;
+        min-width: 30px;
+        max-width: 30px;
+        padding: 4px 2px !important;
+    }
+
+    /* Present and Absent count columns */
+    .present-count,
+    .absent-count {
+        text-align: center !important;
+        font-weight: bold !important;
+        width: 50px !important;
+        min-width: 50px;
+        max-width: 50px;
+    }
+
+    .present-count {
+        color: var(--success-green) !important;
+    }
+
+    .absent-count {
+        color: var(--danger-red) !important;
+    }
+
+    /* ---------- ATTENDANCE MARKS STYLING ---------- */
+    .present-mark, .absent-mark, .no-attendance {
+        display: inline-block;
+        font-weight: bold;
+        font-size: 11px;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        border-radius: 50%;
+    }
+
+    .present-mark {
+        color: var(--success-green) !important;
+        background-color: rgba(39, 174, 96, 0.1) !important;
+        border: none !important;
+    }
+
+    .absent-mark {
+        color: var(--danger-red) !important;
+        background-color: rgba(231, 76, 60, 0.1) !important;
+        border: 1px solid var(--danger-red) !important;
+    }
+
+    .no-attendance {
+        color: #6c757d !important;
+    }
+
+    .attendance-table tbody tr {
+        transition: 0.2s;
+    }
+
+    .attendance-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .attendance-table tbody tr.table-primary {
+        background-color: #ecf7ff;
+        font-weight: 700;
+    }
+
+    /* ---------- EMPTY STATE ---------- */
+    .text-center.py-5.text-muted {
+        padding: 60px 20px !important;
+    }
+
+    .text-center.py-5.text-muted i {
+        color: #bdc3c7;
+        margin-bottom: 15px;
+    }
+
+    /* ---------- PRINT-ONLY ELEMENTS ---------- */
+    .print-header {
+        display: none;
+    }
+
+    .print-title {
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    .print-session-info {
+        margin: 15px 0;
+    }
+
+    .print-row {
+        display: flex;
+        margin-bottom: 5px;
+    }
+
+    .print-label {
+        font-weight: bold;
+        min-width: 80px;
+    }
+
+    .print-value {
+        margin-left: 10px;
+    }
+
+    /* ---------- PRINT STYLES ---------- */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .print-header,
+        .print-header *,
+        .attendance-table-card,
+        .attendance-table-card * {
+            visibility: visible !important;
+        }
+
+        .print-header {
+            position: absolute !important;
+            top: 10px !important;
+            left: 0 !important;
+            right: 0 !important;
+            display: block !important;
+        }
+
+        .attendance-table-card {
+            position: absolute !important;
+            top: 120px !important;
+            left: 0 !important;
+            right: 0 !important;
+            display: block !important;
+        }
+
+        nav, 
+        aside, 
+        footer,
+        .navbar,
+        .sidebar,
+        .footer,
+        .print-btn,
+        .btn,
+        .no-print,
+        .attendance-session-header,
+        .session-info-card,
+        .attendance-table-card .card-header {
+            display: none !important;
+        }
+
+        body {
+            background-color: white !important;
+            font-size: 9px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            visibility: visible !important;
+        }
+
+        .print-title {
+            font-size: 22px !important;
+            text-align: center;
+            margin: 0 0 10px 0 !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+        }
+
+        .print-session-info {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin: 0 0 15px 0 !important;
+            padding: 8px 0 !important;
+            font-size: 10px !important;
+            width: 100% !important;
+            border-top: 2px solid #000 !important;
+            border-bottom: 2px solid #000 !important;
+            background-color: #f8f8f8 !important;
+        }
+
+        .print-row {
+            flex: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 15px !important;
+            position: relative !important;
+        }
+
+        .print-row:not(:last-child)::after {
+            content: "|" !important;
+            position: absolute !important;
+            right: 0 !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+        }
+
+        .print-row:first-child {
+            padding-left: 0 !important;
+        }
+
+        .print-row:last-child {
+            padding-right: 0 !important;
+        }
+
+        .print-label {
+            font-weight: bold !important;
+            font-size: 10px !important;
+            text-transform: uppercase !important;
+            margin-right: 6px !important;
+            white-space: nowrap !important;
+        }
+
+        .print-value {
+            font-size: 10px !important;
+            text-align: left !important;
+            margin-left: 0 !important;
+            font-weight: 500 !important;
+            flex: 1 !important;
+        }
+
+        .attendance-table-card {
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .attendance-table-card .card-body {
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        .attendance-table {
+            font-size: 8px !important;
+            border-collapse: collapse !important;
+            margin: 0 !important;
+            width: 100% !important;
+            page-break-inside: avoid !important;
+            border: 2px solid #000 !important;
+            table-layout: fixed !important; /* Fixed for print to ensure consistency */
+        }
+
+        /* Adjust column widths for print */
+        .col-date-header {
+            width: 40px !important;
+        }
+        
+        .col-year-header {
+            width: 50px !important;
+        }
+        
+        .col-date {
+            width: 18px !important;
+            min-width: 18px !important;
+        }
+        
+        .col-present,
+        .col-absent {
+            width: 25px !important;
+            min-width: 25px !important;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            border: 1px solid #000 !important;
+            padding: 2px 1px !important;
+            font-size: 8px !important;
+            line-height: 1.1 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            vertical-align: middle !important;
+        }
+
+        .attendance-table th {
+            background-color: #f0f0f0 !important;
+            font-weight: bold !important;
+            text-align: center !important;
+        }
+
+        .year-header, .month-header, .day-header,
+        .year-cell, .month-cell, .day-cell {
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 3px 1px !important;
+            font-weight: bold !important;
+        }
+
+        .student-id-header,
+        .student-id {
+            text-align: center !important;
+            font-weight: normal !important;
+            white-space: nowrap !important;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            min-width: 50px !important;
+        }
+
+        .student-name-header,
+        .student-name {
+            text-align: left !important;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            min-width: 80px !important;
+        }
+
+        .class-number,
+        .attendance-cell {
+            width: 18px !important;
+            min-width: 18px !important;
+            max-width: 18px !important;
+            padding: 1px !important;
+        }
+
+        .present-count,
+        .absent-count {
+            width: 25px !important;
+            min-width: 25px !important;
+            max-width: 25px !important;
+            font-weight: bold !important;
+        }
+
+        .present-mark, .absent-mark, .no-attendance {
+            font-weight: bold !important;
+            font-size: 7px !important;
+            width: 14px !important;
+            height: 14px !important;
+            line-height: 14px !important;
+            text-align: center !important;
+            display: inline-block !important;
+        }
+
+        .present-mark {
+            color: #155724 !important;
+            background-color: transparent !important;
+            border: none !important;
+        }
+
+        .absent-mark {
+            color: #721c24 !important;
+            background-color: transparent !important;
+            border: 1px solid #721c24 !important;
+        }
+
+        .no-attendance {
+            color: #6c757d !important;
+        }
+
+        .text-success,
+        .text-danger {
+            color: #000 !important;
+            font-weight: bold !important;
+        }
+
+        .attendance-table thead tr {
+            border-bottom: 2px solid #000 !important;
+        }
+
+        @page {
+            size: landscape;
+            margin: 0.5cm;
+        }
+
+        .attendance-table {
+            page-break-inside: avoid;
+        }
+
+        * {
+            color: #000 !important;
+            background-color: white !important;
+        }
+    }
+
+    /* ---------- RESPONSIVE ADJUSTMENTS ---------- */
+    @media (max-width: 1400px) {
+        .student-name {
+            max-width: 200px;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .student-name {
+            max-width: 180px;
+        }
+        
+        .col-date {
+            width: 28px;
+            min-width: 28px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .attendance-session-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .attendance-session-header h2 {
+            margin-bottom: 15px;
+        }
+
+        .session-info-row {
+            flex-wrap: wrap;
+            gap: 15px 0;
+        }
+
+        .session-info-item {
+            flex: 0 0 50%;
+            padding: 0 10px;
+            min-width: 50%;
+        }
+
+        .session-info-separator {
+            display: none;
+        }
+
+        .session-info-item:nth-child(odd) {
+            text-align: left;
+            padding-left: 0;
+        }
+
+        .session-info-item:nth-child(even) {
+            text-align: right;
+            padding-right: 0;
+        }
+        
+        .student-name {
+            max-width: 150px;
+        }
+        
+        .col-date {
+            width: 25px;
+            min-width: 25px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .attendance-table {
+            font-size: 10px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 5px 3px;
+        }
+
+        .present-mark, .absent-mark, .no-attendance {
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+        }
+        
+        .student-name {
+            max-width: 120px;
+        }
+        
+        .col-date {
+            width: 22px;
+            min-width: 22px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .session-info-item {
+            flex: 0 0 100%;
+            text-align: left !important;
+            padding: 5px 0 !important;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .session-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .session-info-label {
+            font-size: 0.85rem;
+        }
+        
+        .session-info-value {
+            font-size: 1rem;
+        }
+        
+        .session-info-header,
+        .attendance-table-header {
+            padding: 10px 15px !important;
+        }
+        
+        .session-info-header h5,
+        .attendance-table-header h5 {
+            font-size: 1rem;
+        }
+        
+        .print-btn {
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .student-name {
+            max-width: 100px;
+        }
+        
+        .col-date {
+            width: 20px;
+            min-width: 20px;
+        }
+        
+        .col-present,
+        .col-absent {
+            width: 40px;
+            min-width: 40px;
+        }
+    }
+
+    /* For very wide tables (many dates) */
+    @media (max-width: 768px) and (min-width: 576px) {
+        .col-date {
+            width: 20px;
+            min-width: 20px;
+        }
+    }
+</style>
+
+<script>
+    // JavaScript to dynamically adjust column widths based on content
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.querySelector('.attendance-table');
+        if (!table) return;
+        
+        // Function to calculate and set optimal column widths
+        function adjustColumnWidths() {
+            const headers = table.querySelectorAll('thead th');
+            const rows = table.querySelectorAll('tbody tr');
+            
+            // Skip if no rows
+            if (rows.length === 0) return;
+            
+            // Calculate max width for each column
+            const maxWidths = new Array(headers.length).fill(0);
+            
+            // Check header content
+            headers.forEach((header, index) => {
+                const text = header.textContent.trim();
+                const width = text.length * 8 + 20; // Approximate pixel width
+                maxWidths[index] = Math.max(maxWidths[index], width);
+            });
+            
+            // Check cell content in each row
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    const text = cell.textContent.trim();
+                    const width = text.length * 8 + 16; // Approximate pixel width
+                    maxWidths[index] = Math.max(maxWidths[index], width);
+                });
+            });
+            
+            // Apply min and max limits
+            headers.forEach((header, index) => {
+                let calculatedWidth = Math.min(Math.max(maxWidths[index], 30), 200);
+                
+                // Special handling for different column types
+                if (header.classList.contains('student-id-header') || 
+                    cell.classList.contains('student-id')) {
+                    calculatedWidth = Math.max(calculatedWidth, 80);
+                } else if (header.classList.contains('student-name-header') || 
+                          cell.classList.contains('student-name')) {
+                    calculatedWidth = Math.max(calculatedWidth, 120);
+                } else if (header.classList.contains('class-number') || 
+                          cell.classList.contains('attendance-cell')) {
+                    calculatedWidth = 30; // Fixed width for attendance cells
+                } else if (header.classList.contains('present-count') || 
+                          header.classList.contains('absent-count')) {
+                    calculatedWidth = 50; // Fixed width for summary columns
+                }
+                
+                header.style.minWidth = calculatedWidth + 'px';
+                header.style.width = calculatedWidth + 'px';
+            });
+            
+            // Apply same widths to first row cells (for consistency)
+            const firstRowCells = rows[0].querySelectorAll('td');
+            firstRowCells.forEach((cell, index) => {
+                cell.style.minWidth = maxWidths[index] + 'px';
+                cell.style.width = maxWidths[index] + 'px';
+            });
+        }
+        
+        // Initial adjustment
+        adjustColumnWidths();
+        
+        // Adjust on window resize (with debounce)
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(adjustColumnWidths, 250);
+        });
+    });
+</script>
+
+{% endblock %}

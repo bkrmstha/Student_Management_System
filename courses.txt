@@ -1,0 +1,92 @@
+Courses app — Step-by-step implementation guide
+
+Overview
+- Purpose: manage `Course`, `Subject`, `Batch`, semesters and link subjects to teachers.
+- Files: `models.py`, `forms.py`, `views.py`, `urls.py`, `admin.py`, `templatetags`.
+
+1) Models
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    is_active = models.BooleanField(default=True)
+
+class Batch(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField()
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.name} ({self.year})"
+
+class Subject(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    teacher = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    semester = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return self.name
+
+2) Forms
+- Simple model forms for `Course`, `Batch`, `Subject`.
+
+3) Views
+- CRUD views for courses, batch listing, subject assignment.
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Subject
+
+def course_list(request):
+    courses = Course.objects.filter(is_active=True)
+    return render(request, 'courses/list.html', {'courses': courses})
+
+4) URLs
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.course_list, name='course_list'),
+]
+
+5) Admin
+- Register `Course`, `Batch`, `Subject` with list_display and filters.
+
+from django.contrib import admin
+from .models import Course, Batch, Subject
+
+admin.site.register(Course)
+admin.site.register(Batch)
+admin.site.register(Subject)
+
+6) Templatetags
+- Use `templatetags/custom_filters.py` to create helpers (already present in repo).
+
+7) Commands
+
+```bash
+python manage.py makemigrations courses
+python manage.py migrate
+``` 
+
+8) Notes
+- Keep relationships normalized; use `related_name` on foreign keys for clarity.
+- Add uniqueness constraints where needed (e.g., subject per course+semester).
+ 
+Project-specific models (from this repository)
+
+- `Course`:
+    - Fields: `name`, `short_name` (normalized to uppercase), `course_type` (`semester` or `yearly`), `is_active`, timestamps.
+    - Validation: `clean()` ensures `short_name` normalized and not equal to full `name`.
+
+- `Subject`:
+    - Fields: `course` FK, `code`, `name`, `semester` (1-8), `year` (1-4), optional `teacher` (limit_choices_to role=teacher).
+    - `clean()` enforces `semester` vs `year` requirements depending on `course.course_type` and `unique_together = ('course', 'code')`.
+
+Notes specific to this codebase
+- `Subject.period` property returns either "Semester X" or "Year Y" depending on `Course.course_type`.
+- When creating courses programmatically, ensure `short_name` is alphanumeric and unique; `Batch.import_all_courses()` depends on valid `short_name`.
+
