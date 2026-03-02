@@ -1,0 +1,55 @@
+SMS subsystem — Step-by-step integration guide
+
+Overview
+- Purpose: send SMS notifications for attendance, notices, or alerts. This app directory may contain integration code and provider wrappers.
+
+1) Design
+- Create a simple service layer that formats messages and calls an external provider API (e.g., Twilio, Africa's Talking, or a local SMS gateway).
+
+2) Example gateway wrapper (sms/gateway.py)
+
+import requests
+
+class SMSProvider:
+    def __init__(self, api_key, base_url):
+        self.api_key = api_key
+        self.base_url = base_url
+
+    def send(self, to, message):
+        payload = {'to': to, 'message': message, 'api_key': self.api_key}
+        resp = requests.post(self.base_url, data=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+3) Usage example
+
+from .gateway import SMSProvider
+
+provider = SMSProvider(api_key='API_KEY', base_url='https://sms.example/send')
+provider.send('+1234567890', 'Your child was absent today')
+
+4) Django management command
+- Create `management/commands/send_sms_reminders.py` to send scheduled messages via cron or `django-crontab`.
+
+5) Environment & secrets
+- Store API keys in environment variables and load with `django-environ` or `os.environ`.
+
+6) Tests
+- Mock HTTP requests with `responses` or `requests-mock`.
+
+7) Notes
+- Respect privacy and opt-out rules. Use rate-limiting and retry/backoff.
+ 
+Project notes for this repository
+
+- There is no dedicated `sms` Django app in this project tree. Add a small utility module (e.g., `utils/sms.py` or a new `messaging` app) to centralize provider wrappers.
+
+- Suggested structure:
+    - `utils/sms.py` — provider wrappers (`SMSProvider` base, `TwilioProvider`, etc.).
+    - `messaging/management/commands/send_sms_reminders.py` — scheduled sends.
+    - Environment variables: `SMS_API_KEY`, `SMS_BASE_URL`, `SMS_PROVIDER` in `.env`.
+
+- Implementation notes:
+    - Use `requests` with backoff (e.g., `tenacity`) and log all responses to a `SMSLog` model for auditing.
+    - Respect student/guardian contact preferences stored in `accounts` models before sending.
+
