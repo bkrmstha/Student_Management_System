@@ -74,9 +74,7 @@ class AttendanceSessionForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # 1. Handle Teacher Role Permissions
         if user and hasattr(user, 'role') and user.role == 'teacher':
-            # Limit batches to only those this teacher has subjects in
             teacher_subjects = Subject.objects.filter(teacher=user)
             batch_ids = teacher_subjects.values_list('course__batch_courses__batch', flat=True).distinct()
             self.fields['batch'].queryset = Batch.objects.filter(id__in=batch_ids, is_active=True)
@@ -90,8 +88,6 @@ class AttendanceSessionForm(forms.ModelForm):
         self.fields['teacher'].label_from_instance = self.format_teacher_name
 
         # 3. Dynamic Dropdown Logic: 
-        # If it's a new form (GET), empty Course/Subject so AJAX can fill them.
-        # If it's a POST or editing (instance), keep them populated for validation.
         if 'batch' not in self.data and not self.instance.pk:
             self.fields['course'].queryset = Course.objects.none()
             self.fields['subject'].queryset = Subject.objects.none()

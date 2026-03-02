@@ -461,7 +461,7 @@
                 {% if form.code.errors %}
                 <div class="form-error">{{ form.code.errors.0 }}</div>
                 {% endif %}
-                <div class="form-help">Subject code must be unique within the course</div>
+                <div class="form-help">Subject code must be unique within the course and include both letters and numbers; hyphens/spaces allowed</div>
             </div>
 
             <!-- Subject Name -->
@@ -483,6 +483,7 @@
                 {% if form.name.errors %}
                 <div class="form-error">{{ form.name.errors.0 }}</div>
                 {% endif %}
+                <div class="form-help">Subject name must include at least one letter; numbers allowed but not digits-only</div>
             </div>
 
             <!-- Semester/Year Selection -->
@@ -597,6 +598,12 @@
             
             // Auto-uppercase
             this.value = this.value.toUpperCase();
+            // real-time letter+number check
+            if (!/[A-Z]/.test(this.value) || !/[0-9]/.test(this.value)) {
+                showError('id_code', 'Code must contain both letters and numbers');
+            } else {
+                clearError('id_code');
+            }
         });
         
         // Trigger on load
@@ -619,6 +626,15 @@
                 counterDiv.classList.add('error');
             } else {
                 counterDiv.classList.remove('warning', 'error');
+            }
+            
+            // Auto-uppercase
+            this.value = this.value.toUpperCase();
+            // ensure at least one letter present
+            if (this.value && !/[A-Z]/.test(this.value)) {
+                showError('id_name', 'Name must contain at least one letter');
+            } else {
+                clearError('id_name');
             }
         });
         
@@ -650,6 +666,9 @@
         } else if (code.length < 2) {
             showError('id_code', 'Subject code must be at least 2 characters');
             isValid = false;
+        } else if (!/[A-Z]/.test(code) || !/[0-9]/.test(code)) {
+            showError('id_code', 'Code must include both letters and numbers');
+            isValid = false;
         }
 
         // Validate Subject Name
@@ -658,6 +677,9 @@
             isValid = false;
         } else if (name.length < 3) {
             showError('id_name', 'Subject name must be at least 3 characters');
+            isValid = false;
+        } else if (!/[A-Za-z]/.test(name)) {
+            showError('id_name', 'Subject name must include at least one letter');
             isValid = false;
         }
 

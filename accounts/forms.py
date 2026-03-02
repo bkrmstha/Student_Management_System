@@ -684,7 +684,9 @@ class BatchForm(forms.ModelForm):
                 'class': 'form-input',
                 'placeholder': 'e.g., 2080',
                 'min': 2000,
-                'max': 2100
+                'max': 2100,
+                'maxlength': '4',
+                'oninput': 'if(this.value.length>4) this.value=this.value.slice(0,4);'
             }),
             'start_date': forms.DateInput(attrs={
                 'class': 'form-input',
@@ -699,6 +701,16 @@ class BatchForm(forms.ModelForm):
             })
         }
 
+
+    def clean_year(self):
+        yr = self.cleaned_data.get('year')
+        if yr is not None:
+            s = str(yr)
+            if len(s) != 4:
+                raise forms.ValidationError('Year must be exactly 4 digits.')
+            if not s.isdigit():
+                raise forms.ValidationError('Year must contain only numbers.')
+        return yr
 
 class BatchCourseForm(forms.ModelForm):
     """Form for adding courses to batches"""

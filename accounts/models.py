@@ -298,11 +298,6 @@ class Batch(models.Model):
         
         imported_count = 0
         for course in active_courses:
-            # Skip courses with invalid short names
-            if not course.short_name.isalnum():
-                print(f"Warning: Skipping course '{course.name}' with invalid short name: {course.short_name}")
-                continue
-            
             # Check if course already exists in batch
             if not BatchCourse.objects.filter(batch=self, course=course).exists():
                 try:

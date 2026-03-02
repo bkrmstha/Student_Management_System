@@ -123,7 +123,7 @@
                         <td>{{ subject.teacher.get_full_name|default:"Unassigned" }}</td>
                         <td>
                             <a href="{% url 'courses:edit_subject' subject.id %}" class="action-edit">Edit</a>
-                            <a href="{% url 'courses:delete_subject' subject.id %}" class="action-delete" onclick="return confirm('Are you sure?');">Delete</a>
+                            <a href="{% url 'courses:delete_subject' subject.id %}" class="action-delete">Delete</a>
                         </td>
                     </tr>
                 {% endfor %}

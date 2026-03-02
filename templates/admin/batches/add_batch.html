@@ -205,4 +205,63 @@
         </div>
     </form>
 </div>
+
+<script>
+    function limitDateYear(input) {
+        input.addEventListener('input', function() {
+            let v = this.value;
+            if (v) {
+                const parts = v.split('-');
+                if (parts[0].length > 4) parts[0] = parts[0].slice(0, 4);
+                v = parts.join('-');
+                if (v.length > 10) v = v.slice(0, 10);
+                this.value = v;
+            }
+        });
+    }
+    const startDate = document.getElementById('id_start_date');
+    const endDate = document.getElementById('id_end_date');
+    if (startDate) {
+        limitDateYear(startDate);
+        startDate.addEventListener('change', updateEndMax);
+    }
+    if (endDate) {
+        limitDateYear(endDate);
+    }
+    function updateEndMax() {
+        if (startDate && endDate && startDate.value) {
+            let dt = new Date(startDate.value);
+            dt.setFullYear(dt.getFullYear() + 4);
+            // subtract one day so month/day differ from start
+            dt.setDate(dt.getDate() - 1);
+            const maxstr = dt.toISOString().slice(0, 10);
+            endDate.max = maxstr;
+            // if no end date or it's before start, default to 4-year-later minus one day
+            if (!endDate.value || endDate.value < startDate.value) {
+                endDate.value = maxstr;
+            } else if (endDate.value > maxstr) {
+                endDate.value = maxstr;
+            }
+        }
+    }
+    updateEndMax();
+
+    document.querySelector('.batch-form').addEventListener('submit', function(e) {
+        if (startDate && endDate && startDate.value && endDate.value) {
+            if (endDate.value < startDate.value) {
+                alert('End date cannot be before start date.');
+                e.preventDefault();
+            }
+            let st = new Date(startDate.value);
+            let en = new Date(endDate.value);
+            let max = new Date(st);
+            max.setFullYear(max.getFullYear() + 4);
+            max.setDate(max.getDate() - 1); // ensure month/day differ
+            if (en > max) {
+                alert('End date must be within 4 years of start date.');
+                e.preventDefault();
+            }
+        }
+    });
+</script>
 {% endblock %}

@@ -292,10 +292,22 @@ def guardian_dashboard(request):
     ).values_list('student', flat=True)
     wards = StudentProfile.objects.filter(user__in=ward_users).distinct().order_by('user__first_name')
 
+    # additional aggregated stats for the cards
+    from attendance.models import AttendanceRecord
+    # count unique courses across all wards
+    courses_count = StudentCourseEnrollment.objects.filter(student__in=wards).values('course').distinct().count() if wards.exists() else 0
+    # total attendance records for all wards
+    attendance_count = AttendanceRecord.objects.filter(student__in=wards).count() if wards.exists() else 0
+    # first ward (for showing an ID if single-ward case)
+    first_ward = wards.first() if wards.exists() else None
+
     context = {
         'guardian_profile': guardian_profile,
         'wards_count': wards_count,
         'wards': wards,
+        'courses_count': courses_count,
+        'total_attendance': attendance_count,
+        'first_ward': first_ward,
     }
     # Latest notice relevant to the guardian
     from noticeboard.models import Notice
@@ -641,10 +653,6 @@ def create_student(request):
     """Create a new student account."""
     if request.method == 'POST':
         form = StudentCreationForm(request.POST, request.FILES)
-        # The StudentProfile.model requires `student_id` at model-clean time.
-        # The form intentionally excludes `student_id` (it's auto-generated),
-        # so provide a temporary valid value on the form instance before
-        # running validation to avoid model-level ValidationError.
         if not getattr(form.instance, 'student_id', None):
             form.instance.student_id = f"TMP-{uuid.uuid4().hex[:12].upper()}"
 
@@ -1227,14 +1235,6 @@ def send_credentials_email(user, password):
         return False
     
 
-    # Batch Views
-# accounts/views_batches.py (or add to existing views.py)
-
-# from django.shortcuts import render, redirect, get_object_or_404
-# from django.contrib.auth.decorators import login_required
-# from django.contrib import messages
-# from django.db.models import Q
-# from .decorators import admin_required
 from .models import Batch, BatchCourse
 from courses.models import Course
 

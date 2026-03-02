@@ -455,12 +455,19 @@
                             <i class="fas fa-layer-group"></i> {{ batch.name }}
                         </div>
                         
-                        <!-- View Students Button -->
-                        <div class="course-footer">
+                        <!-- View Students + Remove Button -->
+                        <div class="course-footer" style="display:grid; grid-template-columns: 1fr auto; gap:0.5rem;">
                             <a href="{% url 'course_student_list' batch.id batch_course.course.id %}" 
                                class="btn-view-students" 
                                title="View enrolled students">
                                 <i class="fas fa-user-graduate"></i> View Students
+                            </a>
+                            <a href="{% url 'remove_course_from_batch' batch.id batch_course.course.id %}" 
+                               class="btn-delete" 
+                               title="Remove course from batch"
+                               onclick="return confirm('Remove course {{ batch_course.course.short_name }} from batch {{ batch.name }}?');"
+                               style="align-self:start;">
+                                <i class="fas fa-minus-circle"></i>
                             </a>
                         </div>
                     </div>

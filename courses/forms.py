@@ -25,14 +25,17 @@ class CourseForm(forms.ModelForm):
         name = self.cleaned_data['name'].strip()
         if len(name) < 3:
             raise ValidationError('Course name must be at least 3 characters long.')
+        # no numbers allowed in course name
+        if re.search(r"\d", name):
+            raise ValidationError('Course name cannot contain numbers.')
         return name
     
     def clean_short_name(self):
         short_name = self.cleaned_data['short_name'].strip().upper()
         
-        # Check if it's alphanumeric
-        if not short_name.isalnum():
-            raise ValidationError('Short name can only contain letters and numbers. No spaces or special characters allowed.')
+        # no numbers allowed, but special characters/spaces are permitted
+        if re.search(r"\d", short_name):
+            raise ValidationError('Short name cannot contain numbers.')
         
         if len(short_name) < 2:
             raise ValidationError('Short name must be at least 2 characters long.')
@@ -150,16 +153,25 @@ class SubjectForm(forms.ModelForm):
     
     def clean_code(self):
         code = self.cleaned_data['code'].upper().strip()
-        
-        # Validate code format (alphanumeric with optional hyphens)
+
+        # Validate code format (alphanumeric with optional hyphens/spaces)
         if not re.match(r'^[A-Z0-9][A-Z0-9\-\s]*[A-Z0-9]$', code):
             raise ValidationError('Subject code can only contain letters, numbers, spaces, and hyphens.')
-        
+
+        # must contain at least one letter and one number
+        if not (re.search(r'[A-Z]', code) and re.search(r'[0-9]', code)):
+            raise ValidationError('Subject code must include both letters and numbers.')
+
         return code
     
     def clean(self):
         cleaned_data = super().clean()
         course = cleaned_data.get('course') or self.course
+        
+        # Subject name must include at least one alphabetic character
+        name_val = cleaned_data.get('name', '').strip()
+        if name_val and not re.search(r'[A-Za-z]', name_val):
+            raise ValidationError({'name': 'Subject name must include at least one letter.'})
         
         if course:
             # Check for unique code within course

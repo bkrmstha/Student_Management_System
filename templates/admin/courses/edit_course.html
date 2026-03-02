@@ -285,7 +285,7 @@
                 {% if form.name.errors %}
                 <div class="form-error">{{ form.name.errors.0 }}</div>
                 {% endif %}
-                <div class="form-help">Full name of the course (e.g., Bachelor of Computer Science)</div>
+                <div class="form-help">Full name of the course (letters and special characters only, no numbers)</div>
             </div>
 
             <!-- Short Name -->
@@ -307,7 +307,7 @@
                 {% if form.short_name.errors %}
                 <div class="form-error">{{ form.short_name.errors.0 }}</div>
                 {% endif %}
-                <div class="form-help">Short abbreviation for the course (must be unique)</div>
+                <div class="form-help">Short abbreviation (letters and special characters allowed, numbers not allowed)</div>
             </div>
 
             <!-- Course Type -->
@@ -370,6 +370,26 @@
         } else {
             counterDiv.classList.remove('warning', 'error');
         }
+        
+        // Real-time check for numbers in course name
+        if (/\d/.test(this.value)) {
+            this.classList.add('error-input');
+            let errorDiv = this.parentNode.querySelector('.field-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error field-error';
+                errorDiv.textContent = 'Course name cannot contain numbers.';
+                this.parentNode.insertBefore(errorDiv, this.nextSibling);
+            } else {
+                errorDiv.textContent = 'Course name cannot contain numbers.';
+            }
+        } else {
+            this.classList.remove('error-input');
+            const errorDiv = this.parentNode.querySelector('.field-error');
+            if (errorDiv && errorDiv.textContent.includes('numbers')) {
+                errorDiv.remove();
+            }
+        }
     });
 
     document.getElementById('short_name').addEventListener('input', function(e) {
@@ -391,6 +411,26 @@
         
         // Auto-uppercase
         this.value = this.value.toUpperCase();
+        
+        // Real-time check for numbers in short name
+        if (/\d/.test(this.value)) {
+            this.classList.add('error-input');
+            let errorDiv = this.parentNode.querySelector('.field-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error field-error';
+                errorDiv.textContent = 'Short name cannot contain numbers.';
+                this.parentNode.insertBefore(errorDiv, this.nextSibling);
+            } else {
+                errorDiv.textContent = 'Short name cannot contain numbers.';
+            }
+        } else {
+            this.classList.remove('error-input');
+            const errorDiv = this.parentNode.querySelector('.field-error');
+            if (errorDiv && errorDiv.textContent.includes('numbers')) {
+                errorDiv.remove();
+            }
+        }
     });
 
     // Form validation
@@ -413,6 +453,9 @@
         } else if (courseName.length < 3) {
             showError('course_name', 'Course name must be at least 3 characters');
             isValid = false;
+        } else if (/\d/.test(courseName)) {
+            showError('course_name', 'Course name cannot contain numbers');
+            isValid = false;
         }
 
         // Validate Short Name
@@ -422,8 +465,8 @@
         } else if (shortName.length < 2) {
             showError('short_name', 'Short name must be at least 2 characters');
             isValid = false;
-        } else if (!/^[A-Z0-9\s\-]+$/.test(shortName)) {
-            showError('short_name', 'Short name can only contain letters, numbers, spaces, and hyphens');
+        } else if (/\d/.test(shortName)) {
+            showError('short_name', 'Short name cannot contain numbers');
             isValid = false;
         }
 
