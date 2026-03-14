@@ -327,6 +327,21 @@ class TeacherCreationForm(DefaultPasswordMixin, forms.ModelForm):
         if teacher_profile.user.phone_number:
             teacher_profile.user.phone_number = teacher_profile.user.phone_number.replace(' ', '')
         
+        # Auto-generate teacher_id if left blank using T prefix and zero padding
+        if not teacher_profile.teacher_id:
+            existing = TeacherProfile.objects.exclude(teacher_id__isnull=True).exclude(teacher_id__exact='')
+            max_num = 0
+            for prof in existing:
+                tid = prof.teacher_id
+                # expect format T#### or numeric; strip non-digits
+                digits = ''.join(ch for ch in tid if ch.isdigit())
+                if digits:
+                    num = int(digits)
+                    if num > max_num:
+                        max_num = num
+            new_num = max_num + 1
+            teacher_profile.teacher_id = f"T{new_num:04d}"  # T0001, T0002, ...
+        
         if commit:
             teacher_profile.save()
         

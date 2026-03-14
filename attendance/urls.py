@@ -18,6 +18,7 @@ urlpatterns = [
     path('sessions/<int:session_id>/complete/', views.complete_attendance_session, name='complete_attendance_session'),
     path('sessions/<int:session_id>/bulk-update/', views.bulk_update_attendance, name='bulk_update_attendance'),
     path('sessions/<int:session_id>/cancel/', views.cancel_attendance_session, name='cancel_attendance_session'),
+    path('sessions/<int:session_id>/activate/', views.activate_attendance_session, name='activate_attendance_session'),
 
     # AJAX endpoints
     path('ajax/get-courses/', views.get_courses_for_batch, name='get_courses_for_batch'),

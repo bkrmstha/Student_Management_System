@@ -149,7 +149,7 @@
         justify-content: center;
     }
 
-    .btn-edit, .btn-view, .btn-delete {
+    .btn-edit, .btn-view, .btn-delete, .btn-activate, .btn-deactivate {
         width: 32px;
         height: 32px;
         display: flex;
@@ -166,8 +166,10 @@
     .btn-edit { background-color: var(--primary-blue); }
     .btn-view { background-color: #95a5a6; }
     .btn-delete { background-color: var(--danger-red); }
+    .btn-activate { background-color: var(--success-green); }
+    .btn-deactivate { background-color: #f39c12; }
 
-    .btn-edit:hover, .btn-view:hover, .btn-delete:hover {
+    .btn-edit:hover, .btn-view:hover, .btn-delete:hover, .btn-activate:hover, .btn-deactivate:hover {
         transform: scale(1.1);
         color: white;
     }
@@ -253,6 +255,22 @@
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
+
+                        {% if session.status != 'cancelled' %}
+                        <form action="{% url 'attendance:cancel_attendance_session' session.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Deactivate this session?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-deactivate" title="Deactivate Session">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <form action="{% url 'attendance:activate_attendance_session' session.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-activate" title="Activate Session">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}

@@ -174,6 +174,28 @@ def remove_course_from_batch(request, batch_id, course_id):
 
 
 @login_required
+def toggle_batch_status(request, batch_id):
+    """Toggle active status of a batch"""
+    if not request.user.is_admin:
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('dashboard_redirect')
+
+    if request.method != 'POST':
+        return redirect('batch_list')
+
+    batch = get_object_or_404(Batch, id=batch_id)
+    
+    # Toggle the active status
+    batch.is_active = not batch.is_active
+    batch.save()
+    
+    status_text = "activated" if batch.is_active else "deactivated"
+    messages.success(request, f'Batch "{batch.name}" has been {status_text}.')
+    
+    return redirect('batch_list')
+
+
+@login_required
 def toggle_batch_course(request, batch_id, batch_course_id):
     """Toggle active status of a course in a batch"""
     if not request.user.is_admin:

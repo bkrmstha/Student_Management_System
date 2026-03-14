@@ -1,3 +1,12 @@
+# ============================================================================
+# Attendance Views - School Management System
+# ============================================================================
+# Views for managing attendance sessions, recording student attendance, and
+# generating reports. Includes separate admin and teacher interfaces.
+#
+# Security note: Only authorized users may access/modify attendance records.
+# ============================================================================
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -119,7 +128,7 @@ def edit_attendance_session(request, session_id):
     return render(request, 'attendance/admin/edit_attendance_session.html', {'form': form, 'session': session})
 
 @login_required
-@login_required
+@require_POST
 @admin_required
 def cancel_attendance_session(request, session_id):
     """Admin-only deactivation: mark session as cancelled instead of deleting."""
@@ -138,6 +147,18 @@ def delete_attendance_session(request, session_id):
     return redirect('attendance:attendance_session_list')
 
 # --- 4. ATTENDANCE TAKING & ACTIONS ---
+
+@login_required
+@require_POST
+@admin_required
+def activate_attendance_session(request, session_id):
+    """Admin-only reactivation: revert a cancelled session back to scheduled."""
+    session = get_object_or_404(AttendanceSession, id=session_id)
+    session.status = 'scheduled'
+    session.save()
+    messages.success(request, "Session activated.")
+    return redirect('attendance:attendance_session_list')
+
 
 @login_required
 def take_attendance(request, session_id):

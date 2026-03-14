@@ -434,8 +434,8 @@
                     </span>
                 </td>
                 <td>
-                    <span class="status-badge status-{{ course.status|lower }}">
-                        {{ course.status }}
+                    <span class="status-badge {% if course.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if course.is_active %}Active{% else %}Inactive{% endif %}
                     </span>
                 </td>
                 <td>

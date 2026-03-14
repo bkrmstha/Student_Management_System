@@ -1,3 +1,12 @@
+# ============================================================================
+# Noticeboard Views - School Management System
+# ============================================================================
+# Views for listing, creating, and managing notices. Handles audience targeting,
+# attachments, comments, and read-tracking.
+#
+# Security note: write operations are restricted to authorized roles.
+# ============================================================================
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -257,15 +266,11 @@ def teacher_create_notice(request):
                 # Create notice directly using POST values
                 title = request.POST.get('title', '').strip()
                 content = request.POST.get('content', '').strip()
-                priority = request.POST.get('priority', 'medium')
-                is_important = str(request.POST.get('is_important', '')).lower() in ('on', 'true', '1', 'yes')
                 expires_at = request.POST.get('expires_at') or None
 
                 notice = Notice(
                     title=title,
                     content=content,
-                    priority=priority,
-                    is_important=is_important,
                     created_by=request.user,
                     audience_type='batch'
                 )

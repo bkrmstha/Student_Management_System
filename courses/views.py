@@ -1,3 +1,10 @@
+# ============================================================================
+# Courses Views - School Management System
+# ============================================================================
+# Views for managing courses, subjects, and teacher assignments.
+# Includes admin CRUD workflows and dashboard views for teachers and students.
+# ============================================================================
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages

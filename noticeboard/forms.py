@@ -12,7 +12,7 @@ class NoticeForm(forms.ModelForm):
         model = Notice
         fields = [
             'title', 'content', 'audience_type', 'batches', 'courses',
-            'priority', 'is_important', 'expires_at'
+            'expires_at'
         ]
         widgets = {
             'title': forms.TextInput(attrs={
@@ -38,12 +38,6 @@ class NoticeForm(forms.ModelForm):
             'courses': forms.CheckboxSelectMultiple(attrs={
                 'class': 'form-check-input',
                 'id': 'courseSelect'
-            }),
-            'priority': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'is_important': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
             }),
             'expires_at': forms.DateTimeInput(attrs={
                 'class': 'form-control',

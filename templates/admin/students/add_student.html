@@ -289,6 +289,10 @@
                     <input type="tel" name="phone_number" id="phone_number" class="form-input">
                 </div>
                 <div class="form-group">
+                    <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                    <input type="tel" name="emergency_contact" id="emergency_contact" class="form-input" placeholder="Emergency contact number">
+                </div>
+                <div class="form-group">
                     <label for="date_of_birth" class="form-label">Date of Birth</label>
                     <input type="date" name="date_of_birth" id="date_of_birth" class="form-input">
                 </div>
@@ -371,13 +375,121 @@
 
 {% block extra_js %}
 <script>
-    document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+    // limit year on date fields
+function limitDateYear(input) {
+    input.addEventListener('input', function() {
+        let v = this.value;
+        if (v) {
+            const parts = v.split('-');
+            if (parts[0].length > 4) parts[0] = parts[0].slice(0, 4);
+            v = parts.join('-');
+            if (v.length > 10) v = v.slice(0, 10);
+            this.value = v;
+        }
+    });
+}
+const dob = document.getElementById('date_of_birth');
+if (dob) limitDateYear(dob);
+
+// real-time alphabetic validation for name-like fields
+['first_name','middle_name','last_name','nationality','address',
+ 'father_name','mother_name'].forEach(id => {
+    const fld = document.getElementById(id);
+    if (fld) {
+        fld.addEventListener('input', function() {
+            if (/^[A-Za-z ]*$/.test(this.value)) {
+                this.classList.remove('error-input');
+                const err = this.parentNode.querySelector('.name-error');
+                if (err) err.remove();
+            } else {
+                this.classList.add('error-input');
+                let err = this.parentNode.querySelector('.name-error');
+                if (!err) {
+                    err = document.createElement('div');
+                    err.className = 'form-error name-error';
+                    err.textContent = 'Only letters and spaces allowed';
+                    this.parentNode.appendChild(err);
+                } else {
+                    err.textContent = 'Only letters and spaces allowed';
+                }
+            }
+        });
+    }
+});
+
+// phone validation (include emergency contact)
+['phone_number','father_phone','mother_phone','emergency_contact'].forEach(id => {
+    const fld = document.getElementById(id);
+    if (fld) {
+        fld.addEventListener('input', function() {
+            if (/^[0-9+\-() ]*$/.test(this.value)) {
+                this.classList.remove('error-input');
+                const err = this.parentNode.querySelector('.phone-error');
+                if (err) err.remove();
+            } else {
+                this.classList.add('error-input');
+                let err = this.parentNode.querySelector('.phone-error');
+                if (!err) {
+                    err = document.createElement('div');
+                    err.className = 'form-error phone-error';
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                    this.parentNode.appendChild(err);
+                } else {
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                }
+            }
+        });
+    }
+});
+
+document.getElementById('addStudentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
         const form = this;
         const formData = new FormData(form);
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = '';
+
+        // perform client-side validation
+        let valid = true;
+        // required fields
+        const required = ['first_name','last_name','email','father_name','mother_name'];
+        // emergency_contact optional but validate format below
+        required.forEach(id => {
+            const fld = form.querySelector('#' + id);
+            if (fld && !fld.value.trim()) {
+                valid = false;
+                fld.classList.add('error-input');
+            }
+        });
+        // email format
+        const emailFld = form.querySelector('#email');
+        if (emailFld && emailFld.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFld.value)) {
+            valid = false;
+            emailFld.classList.add('error-input');
+        }
+        // phone format checks already happen real-time, just recheck
+        ['phone_number','father_phone','mother_phone','emergency_contact'].forEach(id => {
+            const fld = form.querySelector('#' + id);
+            if (fld && fld.value && !/^[0-9+\-() ]+$/.test(fld.value.trim())) {
+                valid = false;
+                fld.classList.add('error-input');
+            }
+        });
+        // name fields reiterate
+        ['first_name','middle_name','last_name','father_name','mother_name','nationality','address','emergency_contact'].forEach(id => {
+            const fld = form.querySelector('#' + id);
+            if (fld && fld.value && !/^[A-Za-z ]+$/.test(fld.value.trim())) {
+                valid = false;
+                fld.classList.add('error-input');
+            }
+        });
+        if (!valid) {
+            messagesDiv.innerHTML = '<div class="alert alert-danger">Please fill in all required fields correctly.</div>';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Student';
+            return;
+        }
 
         const submitBtn = form.querySelector('.submit-btn');
         submitBtn.disabled = true;

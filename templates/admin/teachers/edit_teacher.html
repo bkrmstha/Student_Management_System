@@ -580,7 +580,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="teacher_id" class="form-label">Teacher ID</label>
-                        <input type="text" name="teacher_id" id="teacher_id" class="form-input" 
+                        <input type="text" name="teacher_id" id="teacher_id" class="form-input" readonly
                                value="{{ profile.teacher_id|default:'' }}">
                         <span class="form-help">Leave blank to auto-generate</span>
                     </div>
@@ -709,6 +709,23 @@
         }
     });
     
+    // Limit year field to 4 digits and overall length to 10 characters
+    // identical to batch form implementation
+    function limitDateYear(input) {
+        input.addEventListener('input', function() {
+            let v = this.value;
+            if (v) {
+                const parts = v.split('-');
+                if (parts[0].length > 4) parts[0] = parts[0].slice(0, 4);
+                v = parts.join('-');
+                if (v.length > 10) v = v.slice(0, 10);
+                this.value = v;
+            }
+        });
+    }
+    const joinDate = document.getElementById('joining_date');
+    if (joinDate) limitDateYear(joinDate);
+    
     // Toggle switch label update
     document.getElementById('is_active').addEventListener('change', function(e) {
         const statusLabel = document.querySelector('.status-toggle span:last-child');
@@ -720,5 +737,141 @@
             statusLabel.style.color = '#e74c3c';
         }
     });
+
+    // Real-time alphabetic validation for multiple text fields
+    ['first_name','middle_name','last_name','designation','department'].forEach(id => {
+        const fld = document.getElementById(id);
+        if (fld) {
+            fld.addEventListener('input', function() {
+                if (/^[A-Za-z ]*$/.test(this.value)) {
+                    this.classList.remove('error-input');
+                    const err = this.parentNode.querySelector('.name-error');
+                    if (err) err.remove();
+                } else {
+                    this.classList.add('error-input');
+                    let err = this.parentNode.querySelector('.name-error');
+                    if (!err) {
+                        err = document.createElement('div');
+                        err.className = 'form-error name-error';
+                        err.textContent = 'Only letters and spaces allowed';
+                        this.parentNode.appendChild(err);
+                    } else {
+                        err.textContent = 'Only letters and spaces allowed';
+                    }
+                }
+            });
+        }
+    });
+
+    // Real-time phone validation
+    const phoneFld = document.getElementById('phone_number');
+    if (phoneFld) {
+        phoneFld.addEventListener('input', function() {
+            if (/^[0-9+\-() ]*$/.test(this.value)) {
+                this.classList.remove('error-input');
+                const err = this.parentNode.querySelector('.phone-error');
+                if (err) err.remove();
+            } else {
+                this.classList.add('error-input');
+                let err = this.parentNode.querySelector('.phone-error');
+                if (!err) {
+                    err = document.createElement('div');
+                    err.className = 'form-error phone-error';
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                    this.parentNode.appendChild(err);
+                } else {
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                }
+            }
+        });
+    }
+
+    // Form validation (mirrors create_teacher page)
+    document.querySelector('.edit-form').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = '#e74c3c';
+                isValid = false;
+                
+                let errorDiv = field.parentNode.querySelector('.field-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'form-error';
+                    errorDiv.textContent = 'This field is required';
+                    field.parentNode.appendChild(errorDiv);
+                }
+            } else {
+                field.style.borderColor = '#e0e0e0';
+                const errorMsg = field.parentNode.querySelector('.form-error');
+                if (errorMsg && errorMsg.textContent === 'This field is required') {
+                    errorMsg.remove();
+                }
+            }
+        });
+        
+        // Validate email format
+        const emailField = document.getElementById('email');
+        if (emailField.value && !isValidEmail(emailField.value)) {
+            emailField.style.borderColor = '#e74c3c';
+            isValid = false;
+            
+            let errorDiv = emailField.parentNode.querySelector('.email-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error email-error';
+                errorDiv.textContent = 'Please enter a valid email address';
+                emailField.parentNode.appendChild(errorDiv);
+            }
+        }
+        
+        // Validate various text fields only letters/spaces
+        ['first_name', 'middle_name', 'last_name', 'designation', 'department'].forEach(id => {
+            const fld = document.getElementById(id);
+            if (fld && fld.value && !/^[A-Za-z ]+$/.test(fld.value.trim())) {
+                fld.style.borderColor = '#e74c3c';
+                isValid = false;
+                let errorDiv = fld.parentNode.querySelector('.name-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'form-error name-error';
+                    errorDiv.textContent = 'Only letters and spaces allowed';
+                    fld.parentNode.appendChild(errorDiv);
+                } else {
+                    errorDiv.textContent = 'Only letters and spaces allowed';
+                }
+            }
+        });
+        
+        // Validate phone number contains only digits and allowed specials
+        const phoneField = document.getElementById('phone_number');
+        if (phoneField && phoneField.value) {
+            if (!/^[0-9+\-() ]+$/.test(phoneField.value.trim())) {
+                phoneField.style.borderColor = '#e74c3c';
+                isValid = false;
+                let err = phoneField.parentNode.querySelector('.phone-error');
+                if (!err) {
+                    err = document.createElement('div');
+                    err.className = 'form-error phone-error';
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                    phoneField.parentNode.appendChild(err);
+                } else {
+                    err.textContent = 'Only numbers and + - ( ) allowed';
+                }
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields correctly.');
+        }
+    });
+    
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
 </script>
 {% endblock %}

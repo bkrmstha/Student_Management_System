@@ -50,12 +50,9 @@ class AttendanceSessionForm(forms.ModelForm):
     )
     
     date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-input',
-            'type': 'date',
-        }),
+        widget=forms.HiddenInput(),
         initial=timezone.now().date,
-        label="Attendance Date",
+        label="Attendance Session Created on",
         required=True
     )
 

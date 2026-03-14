@@ -73,6 +73,7 @@ urlpatterns = [
     path('admin/batches/add/', batch_views.add_batch, name='add_batch'),
     path('admin/batches/<int:batch_id>/', batch_views.view_batch, name='view_batch'),
     path('admin/batches/<int:batch_id>/edit/', batch_views.edit_batch, name='edit_batch'),
+    path('admin/batches/<int:batch_id>/toggle/', batch_views.toggle_batch_status, name='toggle_batch_status'),
     path('admin/batches/<int:batch_id>/toggle-course/<int:batch_course_id>/', batch_views.toggle_batch_course, name='toggle_batch_course'),
     path('admin/batches/<int:batch_id>/delete/', batch_views.delete_batch, name='delete_batch'),
     path('admin/batches/<int:batch_id>/add-course/', batch_views.add_course_to_batch, name='add_course_to_batch'),

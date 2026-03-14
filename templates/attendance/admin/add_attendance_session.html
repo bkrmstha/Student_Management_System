@@ -1,44 +1,323 @@
 {% extends 'base.html' %}
+
 {% block title %}Create Daily Attendance{% endblock %}
 
 {% block extra_css %}
 <style>
-    .attendance-card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; max-width: 800px; margin: 2rem auto; }
-    .card-header { background: #2c3e50; color: white; padding: 1.5rem; border-bottom: 4px solid #3498db; }
-    .card-body { padding: 2rem; }
-    .form-group { margin-bottom: 1.5rem; }
-    .form-group label { display: block; font-weight: 600; color: #34495e; margin-bottom: 0.5rem; font-size: 0.95rem; }
-    .form-control, .form-select, .form-textarea { 
-        width: 100%; padding: 0.8rem; border: 2px solid #eef2f7; border-radius: 8px; transition: 0.3s;
+    .create-attendance-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
     }
-    .form-control:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
-    .btn-submit { background: #3498db; color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.3s; }
-    .btn-submit:hover { background: #2980b9; transform: translateY(-2px); }
-    .errorlist { color: #e74c3c; font-size: 0.85rem; padding-left: 0; list-style: none; margin-top: 5px; }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #3498db;
+    }
+
+    .form-header h1 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    .attendance-form {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        padding-left: 0.5rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .section-title span {
+        margin-right: 0.5rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem 1rem;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-group.full-width {
+        grid-column: span 3;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: #e74c3c;
+    }
+
+    .form-control,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #eef2f7;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-help {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .form-error {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .error-input {
+        border-color: #e74c3c !important;
+    }
+
+    .error-input:focus {
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+    }
+
+    .errorlist {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        padding-left: 0;
+        list-style: none;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 300px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #2980b9, #2471a3);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-submit i {
+        font-size: 1.1rem;
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        min-width: 200px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .cancel-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Custom styling for select dropdowns */
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+    }
+
+    /* Date input styling */
+    input[type="date"].form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        color: #2c3e50;
+    }
+
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+        opacity: 0;
+    }
+
+    /* Time input styling */
+    input[type="time"].form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        color: #2c3e50;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn-submit,
+        .cancel-btn {
+            width: 100%;
+            min-width: auto;
+        }
+
+        .form-group.full-width {
+            grid-column: span 1;
+        }
+    }
+
+    /* Animation for form appearance */
+    .attendance-form {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="attendance-card">
-    <div class="card-header">
-        <h3 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>New Attendance Session</h3>
-        <p class="mb-0 opacity-75">Initialize a daily record for a specific batch and subject.</p>
+<div class="create-attendance-container">
+    <div class="form-header">
+        <h1>Create Daily Attendance</h1>
+        <p>Initialize a daily record for a specific batch and subject</p>
     </div>
-    <div class="card-body">
-        <form method="post" id="sessionForm">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}{{ field.errors }}{% endif %}
-                </div>
-            {% endfor %}
+
+    <form method="post" id="sessionForm" class="attendance-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h2 class="section-title">
+                <span>📋</span> Session Details
+            </h2>
+            
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name != 'remarks' and field.name != 'date' %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}" class="form-label {% if field.field.required %}required{% endif %}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}{{ field.errors }}{% endif %}
+                        </div>
+                    {% endif %}
+                    {# keep hidden date input so backend receives it #}
+                    {% if field.name == 'date' %}
+                        {{ field }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
             <button type="submit" class="btn-submit">
-                <i class="fas fa-arrow-right me-2"></i>Proceed to Mark Attendance
+                <i class="fas fa-arrow-right"></i>
+                Proceed to Mark Attendance
             </button>
-        </form>
-    </div>
+            <a href="{% url 'admin_dashboard' %}" class="cancel-btn">
+                <i class="fas fa-times"></i>
+                Cancel
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 

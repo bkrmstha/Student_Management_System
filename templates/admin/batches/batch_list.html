@@ -33,6 +33,9 @@
         text-decoration: none;
         font-weight: 500;
         transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .add-batch-btn:hover {
@@ -53,6 +56,8 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         transition: all 0.3s;
         border: 1px solid #e1e8ed;
+        display: flex;
+        flex-direction: column;
     }
 
     .batch-card:hover {
@@ -60,11 +65,20 @@
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
 
+    .batch-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        gap: 1rem;
+    }
+
     .batch-name {
         font-size: 1.3rem;
         font-weight: bold;
         color: #2c3e50;
-        margin-bottom: 0.5rem;
+        margin: 0;
+        flex: 1;
     }
 
     .batch-year {
@@ -77,6 +91,7 @@
         color: #7f8c8d;
         margin-bottom: 1rem;
         font-size: 0.9rem;
+        flex-grow: 1;
     }
 
     .batch-status {
@@ -86,6 +101,8 @@
         font-size: 0.8rem;
         font-weight: 500;
         text-transform: uppercase;
+        align-self: flex-start;
+        margin-bottom: 1rem;
     }
 
     .status-active {
@@ -98,23 +115,29 @@
         color: #721c24;
     }
 
-    .batch-actions {
-        margin-top: 1rem;
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .btn-view, .btn-edit, .btn-delete {
-        padding: 0.5rem 1rem;
+    /* Consistent button styling for all action buttons */
+    .btn-view, .btn-edit, .btn-delete, .btn-toggle-header {
+        padding: 0.6rem 1.2rem;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         text-decoration: none;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         font-weight: 500;
         transition: all 0.3s;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        min-width: 100px;
+        height: 42px;
+        line-height: 1;
+        box-sizing: border-box;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
+    /* Specific button colors */
     .btn-view {
         background: #17a2b8;
         color: white;
@@ -122,6 +145,8 @@
 
     .btn-view:hover {
         background: #138496;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
     }
 
     .btn-edit {
@@ -131,6 +156,8 @@
 
     .btn-edit:hover {
         background: #e0a800;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
     }
 
     .btn-delete {
@@ -140,6 +167,57 @@
 
     .btn-delete:hover {
         background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Header toggle button - same style as action buttons */
+    .btn-toggle-header {
+        background: #20c997;
+        color: white;
+    }
+
+    .btn-toggle-header:hover {
+        background: #1aa179;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
+    }
+
+    .btn-toggle-header.deactivate {
+        background: #f39c12;
+    }
+
+    .btn-toggle-header.deactivate:hover {
+        background: #d68910;
+        box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+    }
+
+    .batch-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Make action buttons take equal width in their container */
+    .batch-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    /* Override for the action buttons in grid */
+    .batch-actions .btn-view,
+    .batch-actions .btn-edit,
+    .batch-actions .btn-delete {
+        width: 100%;
+        min-width: 0;
+        padding: 0.6rem 0.5rem;
+    }
+
+    /* Icon styling */
+    .btn-view i, .btn-edit i, .btn-delete i, .btn-toggle-header i {
+        font-size: 0.9rem;
     }
 
     .no-batches {
@@ -152,6 +230,84 @@
         font-size: 3rem;
         margin-bottom: 1rem;
         display: block;
+    }
+
+    /* Form styling for inline button */
+    .batch-header-row form {
+        display: inline;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .batch-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .batch-name {
+            width: 100%;
+        }
+        
+        .batch-actions {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .btn-view, .btn-edit, .btn-delete, .btn-toggle-header {
+            width: 100%;
+            min-width: unset;
+        }
+        
+        .batch-header-row form {
+            width: 100%;
+        }
+        
+        .btn-toggle-header {
+            width: 100%;
+        }
+    }
+
+    /* Medium screens - adjust grid */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .batch-actions {
+            gap: 0.6rem;
+        }
+        
+        .btn-view, .btn-edit, .btn-delete {
+            padding: 0.6rem 0.3rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Active state for buttons */
+    .btn-view:active, .btn-edit:active, .btn-delete:active, .btn-toggle-header:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Focus state for accessibility */
+    .btn-view:focus, .btn-edit:focus, .btn-delete:focus, .btn-toggle-header:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.3);
+    }
+
+    /* Optional: Add a subtle animation on page load */
+    .btn-view, .btn-edit, .btn-delete, .btn-toggle-header {
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 {% endblock %}
@@ -169,7 +325,19 @@
         <div class="batch-grid">
             {% for batch in batches %}
                 <div class="batch-card">
-                    <div class="batch-name">{{ batch.name }}</div>
+                    <div class="batch-header-row">
+                        <div class="batch-name">{{ batch.name }}</div>
+                        <form method="post" action="{% url 'toggle_batch_status' batch.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-toggle-header {% if not batch.is_active %}deactivate{% endif %}" 
+                                    title="{% if batch.is_active %}Deactivate Batch{% else %}Activate Batch{% endif %}"
+                                    onclick="return confirm('{% if batch.is_active %}Deactivate{% else %}Activate{% endif %} batch &quot;{{ batch.name }}&quot;?')">
+                                <i class="fas fa-{% if batch.is_active %}ban{% else %}check{% endif %}"></i> 
+                                {% if batch.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    
                     <div class="batch-year">Year: {{ batch.year }}</div>
                     {% if batch.description %}
                         <div class="batch-description">{{ batch.description|truncatechars:100 }}</div>

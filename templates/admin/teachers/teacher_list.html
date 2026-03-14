@@ -522,7 +522,7 @@
                     </div>
                 </td>
                 <td>
-                    <div class="teacher-email">{{ teacher.email }}</div>
+                    <a href="mailto:{{ teacher.email }}" class="teacher-email">{{ teacher.email }}</a>
                 </td>
                 <td>{{ teacher.phone_number|default:"-" }}</td>
                 <td>
